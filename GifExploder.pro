@@ -20,4 +20,5 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 
 OTHER_FILES += \
-    .gitignore
+    .gitignore \
+    README.md

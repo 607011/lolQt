@@ -1,4 +1,6 @@
 gifexploder
 ===========
 
-Split GIF into frames
+Merge animated GIFs and background music into video
+
+
