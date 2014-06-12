@@ -59,6 +59,7 @@ public:
     }
 };
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -102,6 +103,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
+    Q_D(MainWindow);
+    d->process->close();
     saveAppSettings();
     e->accept();
 }
@@ -162,6 +165,7 @@ void MainWindow::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     ui->statusBar->showMessage(tr("Written video to \"%1/%2\".").arg(d->saveDir).arg("output.avi"));
     ui->saveFramesButton->setEnabled(true);
 }
+
 
 void MainWindow::setVolume(void)
 {
