@@ -4,7 +4,7 @@
 #ifndef __IMAGEWIDGET_H_
 #define __IMAGEWIDGET_H_
 
-#include <QWidget>
+#include <QLabel>
 #include <QString>
 #include <QRgb>
 #include <QImage>
@@ -18,35 +18,32 @@
 
 class ImageWidgetPrivate;
 
-class ImageWidget : public QWidget
+class ImageWidget : public QLabel
 {
     Q_OBJECT
 
 public:
-    explicit ImageWidget(QWidget* parent = NULL);
-    void setImage(const QImage&);
-    const QString &imageFileName(void) const;
-    bool loadImage(const QString& fileName);
+    explicit ImageWidget(QLabel* parent = NULL);
     virtual QSize minimumSizeHint(void) const { return QSize(256, 256); }
 
 signals:
     void gifDropped(const QString &fileName);
+    void musicDropped(const QString &fileName);
 
 protected:
-    void resizeEvent(QResizeEvent*);
-    void paintEvent(QPaintEvent*);
     void dragEnterEvent(QDragEnterEvent*);
     void dragLeaveEvent(QDragLeaveEvent*);
     void dropEvent(QDropEvent*);
-    void mousePressEvent(QMouseEvent*);
-    void mouseMoveEvent(QMouseEvent*);
-    void keyPressEvent(QKeyEvent*);
-    void keyReleaseEvent(QKeyEvent*);
 
 private:
     QScopedPointer<ImageWidgetPrivate> d_ptr;
     Q_DECLARE_PRIVATE(ImageWidget)
     Q_DISABLE_COPY(ImageWidget)
+
+private: // methods
+    void loadImage(const QString& fileName);
+    void loadMusic(const QString& fileName);
+
 
 };
 

@@ -1,10 +1,7 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-06-12T09:46:41
-#
-#-------------------------------------------------
+# Copyright (c) 2014 Oliver Lau <ola@ct.de>, Heise Zeitschriften Verlag.
+# All rights reserved.
 
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,3 +18,6 @@ HEADERS  += mainwindow.h \
     main.h
 
 FORMS    += mainwindow.ui
+
+OTHER_FILES += \
+    .gitignore

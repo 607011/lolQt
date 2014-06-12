@@ -5,6 +5,7 @@
 #define __MAINWINDOW_H_
 
 #include <QMainWindow>
+#include <QProcess>
 #include <QScopedPointer>
 #include "imagewidget.h"
 #include "main.h"
@@ -30,6 +31,8 @@ private: // methods
     void saveAppSettings(void);
     void restoreAppSettings(void);
 
+    void calculateFPS(void);
+
 private:
     Ui::MainWindow *ui;
 
@@ -38,7 +41,15 @@ private:
     Q_DISABLE_COPY(MainWindow)
 
 private slots:
-    void saveFrames(void);
+    void saveVideo(void);
+    void analyzeMovie(const QString& fileName);
+    void analyzeAudio(const QString& fileName);
+    void durationChanged(qint64 ms = -1);
+    void bpmChanged(int);
+    void processOutput(void);
+    void processErrorOutput(void);
+    void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void setVolume(void);
 };
 
 #endif // __MAINWINDOW_H_
