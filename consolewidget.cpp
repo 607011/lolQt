@@ -29,11 +29,11 @@ void ConsoleWidget::clear(void)
 
 void ConsoleWidget::out(const QString &msg)
 {
-    ui->consoleTextEdit->append(msg);
+    ui->consoleTextEdit->append(msg.trimmed());
 }
 
 
 void ConsoleWidget::err(const QString &msg)
 {
-    ui->consoleTextEdit->append(msg);
+    ui->consoleTextEdit->append(msg.trimmed());
 }
