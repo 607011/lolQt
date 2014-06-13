@@ -13,17 +13,20 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     imagewidget.cpp \
     settingsform.cpp \
-    consolewidget.cpp
+    consolewidget.cpp \
+    wavewidget.cpp
 
 HEADERS  += mainwindow.h \
     imagewidget.h \
     main.h \
     settingsform.h \
-    consolewidget.h
+    consolewidget.h \
+    wavewidget.h
 
 FORMS    += mainwindow.ui \
     settingsform.ui \
-    consolewidget.ui
+    consolewidget.ui \
+    wavewidget.ui
 
 OTHER_FILES += \
     .gitignore \

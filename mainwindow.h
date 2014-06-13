@@ -44,6 +44,8 @@ private slots:
     void setVolume(void);
     void showConsole(bool);
     void consoleClosed(void);
+    void readAudioBuffer(void);
+    void finishedAudioBuffer(void);
 
 private: // methods
     void saveAppSettings(void);

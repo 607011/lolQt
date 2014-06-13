@@ -6,18 +6,23 @@
 #include <QMediaPlayer>
 #include <QMediaContent>
 #include <QMediaResource>
+#include <QAudioFormat>
+#include <QAudioDecoder>
+#include <QAudioBuffer>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QDir>
 #include <QSettings>
 #include <QStringList>
+#include <QVector>
 #include <QtCore/QDebug>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "settingsform.h"
 #include "consolewidget.h"
+#include "wavewidget.h"
 
 class MainWindowPrivate
 {
@@ -26,9 +31,11 @@ public:
         : settingsForm(new SettingsForm)
         , imageWidget(new ImageWidget)
         , consoleWidget(new ConsoleWidget)
+        , waveWidget(new WaveWidget)
         , process(new QProcess)
         , movie(new QMovie)
         , audio(new QMediaPlayer)
+        , audioDecoder(0)
         , originalFPS(0)
         , fps(0)
         , framesNeeded(0)
@@ -38,9 +45,11 @@ public:
     SettingsForm *settingsForm;
     ImageWidget *imageWidget;
     ConsoleWidget *consoleWidget;
+    WaveWidget *waveWidget;
     QProcess *process;
     QMovie *movie;
     QMediaPlayer *audio;
+    QAudioDecoder *audioDecoder;
     QString audioFilename;
     QStringList tmpImageFiles;
     qreal originalFPS;
@@ -54,6 +63,7 @@ public:
     {
         delete movie;
         delete audio;
+        delete audioDecoder;
     }
 };
 
@@ -71,6 +81,8 @@ MainWindow::MainWindow(QWidget *parent)
     QHBoxLayout *hbox1 = new QHBoxLayout;
     hbox1->addWidget(d->imageWidget);
     ui->originalGroupBox->setLayout(hbox1);
+
+    ui->horizontalLayout2->addWidget(d->waveWidget);
 
     QObject::connect(ui->actionOpenImage, SIGNAL(triggered()), SLOT(openImage()));
     QObject::connect(ui->actionOpenAudio, SIGNAL(triggered()), SLOT(openAudio()));
@@ -330,13 +342,45 @@ void MainWindow::analyzeMovie(const QString &fileName)
 void MainWindow::analyzeAudio(const QString &fileName)
 {
     Q_D(MainWindow);
+
+    if (d->audioDecoder) {
+        QObject::disconnect(d->audioDecoder, SIGNAL(bufferReady()));
+        QObject::disconnect(d->audioDecoder, SIGNAL(finishedAudioBuffer()));
+        delete d->audioDecoder;
+    }
+    d->audioDecoder = new QAudioDecoder;
+    QObject::connect(d->audioDecoder, SIGNAL(bufferReady()), SLOT(readAudioBuffer()));
+    QObject::connect(d->audioDecoder, SIGNAL(finished()), SLOT(finishedAudioBuffer()));
+
+    d->waveWidget->clear();
+
+    d->audioDecoder->setSourceFilename(fileName);
+    d->audioDecoder->start();
+
     d->audioFilename = fileName;
     d->audio->setMedia(QUrl::fromLocalFile(fileName));
     d->audio->play();
+
     ui->volumeDial->setEnabled(true);
     ui->statusBar->showMessage(tr("Audio loaded. Now set bpm accordingly!"), 10000);
     if (d->movie->isValid() && d->movie->frameCount() > 0)
         enableSave();
+}
+
+
+void MainWindow::readAudioBuffer(void)
+{
+    Q_D(MainWindow);
+    QAudioBuffer buf = d->audioDecoder->read();
+    if (!buf.isValid())
+        return;
+    d->waveWidget->append(buf);
+}
+
+
+void MainWindow::finishedAudioBuffer(void)
+{
+    qDebug() << "MainWindow::finishedAudioBuffer()";
 }
 
 
