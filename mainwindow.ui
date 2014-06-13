@@ -123,20 +123,30 @@
     </property>
     <addaction name="actionOpenImage"/>
     <addaction name="actionSaveFrames"/>
+    <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuVideo">
+   <widget class="QMenu" name="menuExtras">
     <property name="title">
-     <string>Video</string>
+     <string>Extras</string>
     </property>
     <widget class="QMenu" name="menuVolume">
      <property name="title">
       <string>Volume</string>
      </property>
     </widget>
+    <addaction name="actionOptions"/>
     <addaction name="menuVolume"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAboutQt"/>
+   </widget>
    <addaction name="menu_File"/>
-   <addaction name="menuVideo"/>
+   <addaction name="menuExtras"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -180,6 +190,31 @@
   <action name="action0">
    <property name="text">
     <string>0%</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
+   </property>
+  </action>
+  <action name="actionD">
+   <property name="text">
+    <string>d</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About ...</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="text">
+    <string>About Qt ...</string>
    </property>
   </action>
  </widget>

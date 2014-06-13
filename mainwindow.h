@@ -30,7 +30,8 @@ protected:
 private: // methods
     void saveAppSettings(void);
     void restoreAppSettings(void);
-
+    void enableSave(void);
+    void disableSave(void);
     void calculateFPS(void);
 
 private:
@@ -41,7 +42,9 @@ private:
     Q_DISABLE_COPY(MainWindow)
 
 private slots:
+    void openImage(void);
     void saveVideo(void);
+    void about(void);
     void analyzeMovie(const QString& fileName);
     void analyzeAudio(const QString& fileName);
     void durationChanged(qint64 ms = -1);
