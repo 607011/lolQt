@@ -21,6 +21,13 @@ ConsoleWidget::~ConsoleWidget()
 }
 
 
+void ConsoleWidget::closeEvent(QCloseEvent *e)
+{
+    emit closed();
+    e->accept();
+}
+
+
 void ConsoleWidget::clear(void)
 {
     ui->consoleTextEdit->clear();

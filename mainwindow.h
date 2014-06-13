@@ -32,6 +32,7 @@ private slots:
     void openImage(void);
     void openAudio(void);
     void saveVideo(void);
+    void saveVideoAs(void);
     void about(void);
     void analyzeMovie(const QString &fileName);
     void analyzeAudio(const QString &fileName);
@@ -41,6 +42,8 @@ private slots:
     void processErrorOutput(void);
     void processFinished(int, QProcess::ExitStatus);
     void setVolume(void);
+    void showConsole(bool);
+    void consoleClosed(void);
 
 private: // methods
     void saveAppSettings(void);

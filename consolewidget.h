@@ -5,6 +5,7 @@
 #define __CONSOLEWIDGET_H_
 
 #include <QWidget>
+#include <QCloseEvent>
 
 namespace Ui {
 class ConsoleWidget;
@@ -17,6 +18,12 @@ class ConsoleWidget : public QWidget
 public:
     explicit ConsoleWidget(QWidget *parent = 0);
     ~ConsoleWidget();
+
+protected:
+    void closeEvent(QCloseEvent *e);
+
+signals:
+    void closed(void);
 
 public slots:
     void clear(void);

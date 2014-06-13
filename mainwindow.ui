@@ -104,6 +104,49 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QDial" name="volumeDial">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>44</width>
+          <height>44</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>44</width>
+          <height>44</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Volume</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+        <property name="wrapping">
+         <bool>false</bool>
+        </property>
+        <property name="notchTarget">
+         <double>10.000000000000000</double>
+        </property>
+        <property name="notchesVisible">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -125,6 +168,7 @@
     <addaction name="actionOpenAudio"/>
     <addaction name="separator"/>
     <addaction name="actionSaveFrames"/>
+    <addaction name="actionSaveFramesAs"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -147,8 +191,15 @@
     <addaction name="actionAbout"/>
     <addaction name="actionAboutQt"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionViewConsole"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuExtras"/>
+   <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -167,7 +218,7 @@
   </action>
   <action name="actionSaveFrames">
    <property name="text">
-    <string>&amp;Save frames ...</string>
+    <string>&amp;Save frames</string>
    </property>
   </action>
   <action name="action100">
@@ -223,6 +274,22 @@
   <action name="actionOpenAudio">
    <property name="text">
     <string>Open audio ...</string>
+   </property>
+  </action>
+  <action name="actionSaveFramesAs">
+   <property name="text">
+    <string>Save frames as ...</string>
+   </property>
+  </action>
+  <action name="actionViewConsole">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Console</string>
    </property>
   </action>
  </widget>

@@ -67,8 +67,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     QSettings::setDefaultFormat(QSettings::NativeFormat);
-    restoreAppSettings();
-    disableSave();
 
     QHBoxLayout *hbox1 = new QHBoxLayout;
     hbox1->addWidget(d->imageWidget);
@@ -77,17 +75,23 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->actionOpenImage, SIGNAL(triggered()), SLOT(openImage()));
     QObject::connect(ui->actionOpenAudio, SIGNAL(triggered()), SLOT(openAudio()));
     QObject::connect(ui->actionSaveFrames, SIGNAL(triggered()), SLOT(saveVideo()));
+    QObject::connect(ui->actionSaveFramesAs, SIGNAL(triggered()), SLOT(saveVideoAs()));
     QObject::connect(ui->actionQuit, SIGNAL(triggered()), SLOT(close()));
     QObject::connect(ui->actionAbout, SIGNAL(triggered()), SLOT(about()));
     QObject::connect(ui->actionSettings, SIGNAL(triggered()), SLOT(showSettings()));
+    QObject::connect(ui->actionViewConsole, SIGNAL(toggled(bool)), SLOT(showConsole(bool)));
     QObject::connect(ui->saveFramesButton, SIGNAL(clicked()), SLOT(saveVideo()));
     QObject::connect(d->imageWidget, SIGNAL(gifDropped(QString)), SLOT(analyzeMovie(QString)));
     QObject::connect(d->imageWidget, SIGNAL(musicDropped(QString)), SLOT(analyzeAudio(QString)));
+    QObject::connect(d->consoleWidget, SIGNAL(closed()), SLOT(consoleClosed()));
     QObject::connect(d->audio, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
     QObject::connect(ui->bpmSpinBox, SIGNAL(valueChanged(int)), SLOT(bpmChanged(int)));
     QObject::connect(d->process, SIGNAL(readyReadStandardOutput()), SLOT(processOutput()));
     QObject::connect(d->process, SIGNAL(readyReadStandardError()), SLOT(processErrorOutput()));
     QObject::connect(d->process, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(processFinished(int,QProcess::ExitStatus)));
+
+    QObject::connect(d->audio, SIGNAL(volumeChanged(int)), ui->volumeDial, SLOT(setValue(int)));
+    QObject::connect(ui->volumeDial, SIGNAL(valueChanged(int)), d->audio, SLOT(setVolume(int)));
 
     QObject::connect(ui->actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
@@ -97,6 +101,9 @@ MainWindow::MainWindow(QWidget *parent)
         ui->menuVolume->addAction(action);
         QObject::connect(action, SIGNAL(triggered()), SLOT(setVolume()));
     }
+
+    restoreAppSettings();
+    disableSave();
 }
 
 
@@ -122,6 +129,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
     }
     saveAppSettings();
     d->settingsForm->close();
+    d->consoleWidget->close();
     e->accept();
 }
 
@@ -155,6 +163,15 @@ void MainWindow::openAudio(void)
     QFileInfo fi(fileName);
     d->settingsForm->setOpenDirectory(fi.absoluteFilePath());
     analyzeAudio(fileName);
+}
+
+
+void MainWindow::saveVideoAs(void)
+{
+    Q_D(MainWindow);
+    bool success = d->settingsForm->chooseOutputFile();
+    if (success)
+        saveVideo();
 }
 
 
@@ -232,6 +249,22 @@ void MainWindow::setVolume(void)
 }
 
 
+void MainWindow::showConsole(bool show)
+{
+    Q_D(MainWindow);
+    if (show)
+        d->consoleWidget->show();
+    else
+        d->consoleWidget->hide();
+}
+
+
+void MainWindow::consoleClosed(void)
+{
+    ui->actionViewConsole->setChecked(false);
+}
+
+
 void MainWindow::calculateFPS(void)
 {
     Q_D(MainWindow);
@@ -301,6 +334,7 @@ void MainWindow::analyzeAudio(const QString &fileName)
     d->audioFilename = fileName;
     d->audio->setMedia(QUrl::fromLocalFile(fileName));
     d->audio->play();
+    ui->volumeDial->setEnabled(true);
     ui->statusBar->showMessage(tr("Audio loaded. Now set bpm accordingly!"), 10000);
 }
 
@@ -324,6 +358,7 @@ void MainWindow::saveAppSettings(void)
     settings.setValue("Settings/mencoderPath", d->settingsForm->getMencoderPath());
     settings.setValue("Settings/audioBitrate", d->settingsForm->getAudioBitrate());
     settings.setValue("Settings/volume", d->audio->volume());
+    settings.setValue("Console/geometry", d->consoleWidget->saveGeometry());
 }
 
 
@@ -333,6 +368,7 @@ void MainWindow::restoreAppSettings(void)
     QSettings settings(Company, AppName);
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
     restoreState(settings.value("MainWindow/windowState").toByteArray());
+    d->consoleWidget->restoreGeometry(settings.value("Console/geometry").toByteArray());
     d->settingsForm->setOutputFile(settings.value("Settings/outputFile", d->settingsForm->getOutputFile()).toString());
     d->settingsForm->setOpenDirectory(settings.value("Settings/openDir", d->settingsForm->getOpenDirectory()).toString());
     d->settingsForm->setTempDirectory(settings.value("Settings/tmpDir", d->settingsForm->getTempDirectory()).toString());
@@ -366,6 +402,7 @@ void MainWindow::about(void)
 void MainWindow::enableSave(void)
 {
     ui->saveFramesButton->setEnabled(true);
+    ui->actionSaveFramesAs->setEnabled(true);
     ui->actionSaveFrames->setEnabled(true);
 }
 
@@ -373,5 +410,6 @@ void MainWindow::enableSave(void)
 void MainWindow::disableSave(void)
 {
     ui->saveFramesButton->setEnabled(false);
+    ui->actionSaveFramesAs->setEnabled(false);
     ui->actionSaveFrames->setEnabled(false);
 }

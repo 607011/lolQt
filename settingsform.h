@@ -29,8 +29,8 @@ public:
     int getAudioBitrate(void) const;
     void setAudioBitrate(int);
 
-private slots:
-    void chooseOutputFile(void);
+public slots:
+    bool chooseOutputFile(void);
     void chooseOpenDirectory(void);
     void chooseTempDirectory(void);
     void chooseMencoder(void);

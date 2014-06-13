@@ -95,15 +95,16 @@ void SettingsForm::setAudioBitrate(int kbps)
 }
 
 
-void SettingsForm::chooseOutputFile(void)
+bool SettingsForm::chooseOutputFile(void)
 {
     const QString &outDir =
             QFileDialog::getSaveFileName(this,
                                          tr("Select output file"),
                                          ui->outputFileLineEdit->text());
     if (outDir.isEmpty())
-        return;
+        return false;
     ui->outputFileLineEdit->setText(outDir);
+    return true;
 }
 
 
