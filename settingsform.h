@@ -1,22 +1,45 @@
-#ifndef SETTINGSFORM_H
-#define SETTINGSFORM_H
+// Copyright (c) 2014 Oliver Lau <ola@ct.de>, Heise Zeitschriften Verlag.
+// All rights reserved.
 
-#include <QWidget>
+#ifndef __SETTINGSFORM_H_
+#define __SETTINGSFORM_H_
+
+#include <QDialog>
 
 namespace Ui {
 class SettingsForm;
 }
 
-class SettingsForm : public QWidget
+class SettingsForm : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit SettingsForm(QWidget *parent = 0);
+    explicit SettingsForm(QDialog *parent = 0);
     ~SettingsForm();
 
-private:
+    QString getOpenDirectory(void) const;
+    void setOpenDirectory(const QString&);
+    QString getOutputFile(void) const;
+    void setOutputFile(const QString&);
+    QString getTempDirectory(void) const;
+    void setTempDirectory(const QString&);
+    QString getMencoderPath(void) const;
+    void setMencoderPath(const QString&);
+    int getAudioBitrate(void) const;
+    void setAudioBitrate(int);
+
+private slots:
+    void chooseOutputFile(void);
+    void chooseOpenDirectory(void);
+    void chooseTempDirectory(void);
+    void chooseMencoder(void);
+
+private: // methods
+
+private: // variables
     Ui::SettingsForm *ui;
+
 };
 
-#endif // SETTINGSFORM_H
+#endif // __SETTINGSFORM_H_

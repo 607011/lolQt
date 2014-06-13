@@ -23,7 +23,7 @@ class ImageWidget : public QLabel
     Q_OBJECT
 
 public:
-    explicit ImageWidget(QLabel* parent = NULL);
+    explicit ImageWidget(QLabel *parent = NULL);
     virtual QSize minimumSizeHint(void) const { return QSize(256, 256); }
 
 signals:
@@ -35,16 +35,16 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent*);
     void dropEvent(QDropEvent*);
 
+private slots:
+
+private: // methods
+    void loadImage(const QString &fileName);
+    void loadMusic(const QString &fileName);
+
 private:
     QScopedPointer<ImageWidgetPrivate> d_ptr;
     Q_DECLARE_PRIVATE(ImageWidget)
     Q_DISABLE_COPY(ImageWidget)
-
-private: // methods
-    void loadImage(const QString& fileName);
-    void loadMusic(const QString& fileName);
-
-
 };
 
 #endif // __IMAGEWIDGET_H_

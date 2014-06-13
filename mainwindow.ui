@@ -122,7 +122,10 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionOpenImage"/>
+    <addaction name="actionOpenAudio"/>
+    <addaction name="separator"/>
     <addaction name="actionSaveFrames"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuExtras">
@@ -134,7 +137,7 @@
       <string>Volume</string>
      </property>
     </widget>
-    <addaction name="actionOptions"/>
+    <addaction name="actionSettings"/>
     <addaction name="menuVolume"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -197,9 +200,9 @@
     <string>&amp;Quit</string>
    </property>
   </action>
-  <action name="actionOptions">
+  <action name="actionSettings">
    <property name="text">
-    <string>Options</string>
+    <string>Settings ...</string>
    </property>
   </action>
   <action name="actionD">
@@ -215,6 +218,11 @@
   <action name="actionAboutQt">
    <property name="text">
     <string>About Qt ...</string>
+   </property>
+  </action>
+  <action name="actionOpenAudio">
+   <property name="text">
+    <string>Open audio ...</string>
    </property>
   </action>
  </widget>

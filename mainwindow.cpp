@@ -17,45 +17,38 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "settingsform.h"
-
+#include "consolewidget.h"
 
 class MainWindowPrivate
 {
 public:
     MainWindowPrivate()
         : settingsForm(new SettingsForm)
-        , imageWidget(0)
+        , imageWidget(new ImageWidget)
+        , consoleWidget(new ConsoleWidget)
         , process(new QProcess)
         , movie(new QMovie)
         , audio(new QMediaPlayer)
-        , frameFilenamePattern("%1-%2.png")
-        , mencoderPath("D:/Developer/mencoder/mencoder.exe")
-        , tmpDir(QDir::tempPath())
         , originalFPS(0)
         , fps(0)
         , framesNeeded(0)
-        , audioBitrate(128)
-
+        , frameFilenamePattern("%1-%2.png")
     { /* ... */ }
 
     SettingsForm *settingsForm;
     ImageWidget *imageWidget;
+    ConsoleWidget *consoleWidget;
     QProcess *process;
     QMovie *movie;
     QMediaPlayer *audio;
     QString audioFilename;
     QStringList tmpImageFiles;
-    QString openDir;
-    QString saveDir;
-    // %1 original filename
-    // %2 sequence number (4 digits)
-    QString frameFilenamePattern;
-    QString mencoderPath;
-    QString tmpDir;
     qreal originalFPS;
     qreal fps;
     int framesNeeded;
-    int audioBitrate;
+    // %1 original filename
+    // %2 sequence number (4 digits)
+    QString frameFilenamePattern;
 
     ~MainWindowPrivate()
     {
@@ -77,15 +70,16 @@ MainWindow::MainWindow(QWidget *parent)
     restoreAppSettings();
     disableSave();
 
-    d->imageWidget = new ImageWidget;
-    QHBoxLayout* hbox1 = new QHBoxLayout;
+    QHBoxLayout *hbox1 = new QHBoxLayout;
     hbox1->addWidget(d->imageWidget);
     ui->originalGroupBox->setLayout(hbox1);
 
-    QObject::connect(ui->actionOpenImage, SIGNAL(triggered()),SLOT(openImage()));
-    QObject::connect(ui->actionSaveFrames, SIGNAL(triggered()),SLOT(saveVideo()));
-    QObject::connect(ui->actionQuit, SIGNAL(triggered()),SLOT(close()));
-    QObject::connect(ui->actionAbout, SIGNAL(triggered()),SLOT(about()));
+    QObject::connect(ui->actionOpenImage, SIGNAL(triggered()), SLOT(openImage()));
+    QObject::connect(ui->actionOpenAudio, SIGNAL(triggered()), SLOT(openAudio()));
+    QObject::connect(ui->actionSaveFrames, SIGNAL(triggered()), SLOT(saveVideo()));
+    QObject::connect(ui->actionQuit, SIGNAL(triggered()), SLOT(close()));
+    QObject::connect(ui->actionAbout, SIGNAL(triggered()), SLOT(about()));
+    QObject::connect(ui->actionSettings, SIGNAL(triggered()), SLOT(showSettings()));
     QObject::connect(ui->saveFramesButton, SIGNAL(clicked()), SLOT(saveVideo()));
     QObject::connect(d->imageWidget, SIGNAL(gifDropped(QString)), SLOT(analyzeMovie(QString)));
     QObject::connect(d->imageWidget, SIGNAL(musicDropped(QString)), SLOT(analyzeAudio(QString)));
@@ -108,26 +102,27 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete d_ptr->settingsForm;
     delete ui;
 }
 
 
-void MainWindow::closeEvent(QCloseEvent* e)
+void MainWindow::closeEvent(QCloseEvent *e)
 {
     Q_D(MainWindow);
     if (d->process->state() == QProcess::Running) {
         QMessageBox::StandardButton button;
-        button = QMessageBox::question(this, tr("Really exit?"),
-                                  tr("The encoder is running in the background."
-                                     " If you quit the process will be cancelled and the results be lost."
-                                     " Do you really want to exit?"));
-        if (button == QMessageBox::Yes) {
-            d->process->close();
-            saveAppSettings();
-            e->accept();
-        }
+        button = QMessageBox::question(this,
+                                       tr("Really exit?"),
+                                       tr("The encoder is running in the background."
+                                          " If you quit, the process will be cancelled and the results be lost."
+                                          " Do you really want to quit?"));
+        if (button != QMessageBox::Yes)
+            return e->ignore();
+        d->process->close();
     }
+    saveAppSettings();
+    d->settingsForm->close();
+    e->accept();
 }
 
 
@@ -137,73 +132,93 @@ void MainWindow::openImage(void)
     const QString &fileName =
             QFileDialog::getOpenFileName(this,
                                          tr("Open animated GIF/PNG"),
-                                         d->openDir,
+                                         d->settingsForm->getOpenDirectory(),
                                          tr("Images (*.gif *.png)"));
     if (fileName.isEmpty())
         return;
     QFileInfo fi(fileName);
-    d->openDir = fi.absoluteFilePath();
+    d->settingsForm->setOpenDirectory(fi.absoluteFilePath());
     analyzeMovie(fileName);
+}
+
+
+void MainWindow::openAudio(void)
+{
+    Q_D(MainWindow);
+    const QString &fileName =
+            QFileDialog::getOpenFileName(this,
+                                         tr("Open audio file"),
+                                         d->settingsForm->getOpenDirectory(),
+                                         tr("Audio files (*.mp3)"));
+    if (fileName.isEmpty())
+        return;
+    QFileInfo fi(fileName);
+    d->settingsForm->setOpenDirectory(fi.absoluteFilePath());
+    analyzeAudio(fileName);
 }
 
 
 void MainWindow::saveVideo(void)
 {
     Q_D(MainWindow);
-    if (d->saveDir.isEmpty()) {
-        const QString &outDir =
-                QFileDialog::getExistingDirectory(this,
-                                                  tr("Select save directory"),
-                                                  d->saveDir);
-        if (outDir.isEmpty())
+    QFileInfo fi(d->settingsForm->getOutputFile());
+    if (fi.exists()) {
+        QMessageBox::StandardButton button;
+        button = QMessageBox::question(this,
+                                       tr("Overwrite file?"),
+                                       tr("The selected output file already exists."
+                                          " Do you want to overwrite the file?"));
+        if (button != QMessageBox::Yes)
             return;
-        d->saveDir = outDir;
     }
-    QFile frameFileList(d->tmpDir + "/" + AppName + "-list.txt");
-    int seqLen = d->tmpImageFiles.count();
+    QFile frameFileList(d->settingsForm->getTempDirectory() + "/" + AppName + "-list.txt");
+    const int N = d->tmpImageFiles.count();
+    Q_ASSERT(N > 0);
     if (frameFileList.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         for (int i = 0, j = 0; i < d->framesNeeded; ++i, ++j) {
-            frameFileList.write(d->tmpImageFiles[j % seqLen].toLocal8Bit());
+            frameFileList.write(d->tmpImageFiles[j % N].toLocal8Bit());
             frameFileList.write("\n");
         }
     }
     frameFileList.close();
     const QImage &frame = d->movie->currentImage();
-    QString cmdLine = d->mencoderPath +
+    QString cmdLine = d->settingsForm->getMencoderPath() +
             QString(" mf://@%1").arg(frameFileList.fileName()) +
             QString(" -mf w=%1:h=%2:fps=%3:type=png").arg(frame.width()).arg(frame.height()).arg(d->fps) +
             QString(" -ovc lavc") +
             QString(" -lavcopts vcodec=mpeg4:mbd=2:trell:aspect=%1/%2").arg(frame.width()).arg(frame.height()) +
             QString(" -oac mp3lame") +
-            QString(" -lameopts cbr:br=%1").arg(d->audioBitrate) +
+            QString(" -lameopts cbr:br=%1").arg(d->settingsForm->getAudioBitrate()) +
             QString(" -audiofile \"%1\"").arg(d->audioFilename) +
-            QString(" -o \"%1/%2\"").arg(d->saveDir).arg("output.avi");
-    ui->saveFramesButton->setEnabled(false);
+            QString(" -o \"%1\"").arg(d->settingsForm->getOutputFile());
+    disableSave();
     d->process->start(cmdLine);
+    d->consoleWidget->clear();
+    d->consoleWidget->show();
 }
 
 
 void MainWindow::processOutput(void)
 {
     Q_D(MainWindow);
-    ui->statusBar->showMessage(d->process->readAllStandardOutput());
+    const QByteArray &buf = d->process->readAllStandardOutput();
+    ui->statusBar->showMessage(buf);
+    d->consoleWidget->out(buf);
 }
 
 
 void MainWindow::processErrorOutput(void)
 {
     Q_D(MainWindow);
-    QByteArray buf = d->process->readAllStandardError();
-    QString output(buf);
-    qWarning() << output;
+    const QByteArray &buf = d->process->readAllStandardError();
+    d->consoleWidget->out(buf);
 }
 
 
 void MainWindow::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     Q_D(MainWindow);
-    ui->statusBar->showMessage(tr("Written video to \"%1/%2\".")
-                               .arg(d->saveDir).arg("output.avi"));
+    ui->statusBar->showMessage(tr("Written video to \"%1\".").arg(d->settingsForm->getOutputFile()));
     enableSave();
 }
 
@@ -214,6 +229,32 @@ void MainWindow::setVolume(void)
     QAction *action = reinterpret_cast<QAction*>(sender());
     if (action)
         d->audio->setVolume(action->data().toInt());
+}
+
+
+void MainWindow::calculateFPS(void)
+{
+    Q_D(MainWindow);
+    if (d->movie->frameCount() > 0) {
+        qreal bpm = ui->bpmSpinBox->value();
+        d->fps = bpm / 60.0 * d->movie->frameCount();
+        ui->fpsLineEdit->setText(QString("%1").arg(d->fps, 0, 'g', 4));
+        d->movie->setSpeed(qRound(100 / d->originalFPS * d->fps));
+        qreal duration = d->audio->duration() > 0 ? 1e-3 * d->audio->duration() : 1;
+        d->framesNeeded = qRound(d->fps * duration);
+    }
+}
+
+
+void MainWindow::durationChanged(qint64)
+{
+    calculateFPS();
+}
+
+
+void MainWindow::bpmChanged(int)
+{
+    calculateFPS();
 }
 
 
@@ -228,7 +269,7 @@ void MainWindow::analyzeMovie(const QString &fileName)
         qreal duration = 0;
         d->movie->jumpToFrame(0);
         for (int i = 0; i < d->movie->frameCount(); ++i) {
-            const QString &fqSavePath = d->tmpDir +
+            const QString &fqSavePath = d->settingsForm->getTempDirectory() +
                     "/" +
                     d->frameFilenamePattern.arg(fi.baseName()).arg(i, 4, 10, QChar('0'));
             const QImage &frame = d->movie->currentImage();
@@ -246,7 +287,7 @@ void MainWindow::analyzeMovie(const QString &fileName)
         enableSave();
         d->imageWidget->setMovie(d->movie);
         d->movie->start();
-        durationChanged();
+        calculateFPS();
     }
     else {
         disableSave();
@@ -264,28 +305,10 @@ void MainWindow::analyzeAudio(const QString &fileName)
 }
 
 
-void MainWindow::calculateFPS(void)
+void MainWindow::showSettings(void)
 {
     Q_D(MainWindow);
-    if (d->movie->frameCount() > 0) {
-        qreal bpm = ui->bpmSpinBox->value();
-        d->fps = bpm / 60.0 * d->movie->frameCount();
-        ui->fpsLineEdit->setText(QString("%1").arg(d->fps, 0, 'g', 4));
-        d->movie->setSpeed(qRound(100 / d->originalFPS * d->fps));
-    }
-}
-
-void MainWindow::durationChanged(qint64)
-{
-    Q_D(MainWindow);
-    calculateFPS();
-    d->framesNeeded = qRound(d->fps * qreal(d->audio->duration()) / 1000);
-}
-
-
-void MainWindow::bpmChanged(int)
-{
-    calculateFPS();
+    d->settingsForm->show();
 }
 
 
@@ -295,10 +318,12 @@ void MainWindow::saveAppSettings(void)
     QSettings settings(Company, AppName);
     settings.setValue("MainWindow/geometry", saveGeometry());
     settings.setValue("MainWindow/windowState", saveState());
-    settings.setValue("MainWindow/saveDir", d->saveDir);
-    settings.setValue("MainWindow/mencoderPath", d->mencoderPath);
-    settings.setValue("MainWindow/tmpDir", d->tmpDir);
-    settings.setValue("MainWindow/volume", d->audio->volume());
+    settings.setValue("Settings/outputFile", d->settingsForm->getOutputFile());
+    settings.setValue("Settings/openDir", d->settingsForm->getOpenDirectory());
+    settings.setValue("Settings/tmpDir", d->settingsForm->getTempDirectory());
+    settings.setValue("Settings/mencoderPath", d->settingsForm->getMencoderPath());
+    settings.setValue("Settings/audioBitrate", d->settingsForm->getAudioBitrate());
+    settings.setValue("Settings/volume", d->audio->volume());
 }
 
 
@@ -308,10 +333,12 @@ void MainWindow::restoreAppSettings(void)
     QSettings settings(Company, AppName);
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
     restoreState(settings.value("MainWindow/windowState").toByteArray());
-    d->saveDir = settings.value("MainWindow/saveDir", d->saveDir).toString();
-    d->mencoderPath = settings.value("MainWindow/mencoderPath", d->mencoderPath).toString();
-    d->tmpDir = settings.value("MainWindow/tmpDir", d->tmpDir).toString();
-    d->audio->setVolume(settings.value("MainWindow/volume", 50).toInt());
+    d->settingsForm->setOutputFile(settings.value("Settings/outputFile", d->settingsForm->getOutputFile()).toString());
+    d->settingsForm->setOpenDirectory(settings.value("Settings/openDir", d->settingsForm->getOpenDirectory()).toString());
+    d->settingsForm->setTempDirectory(settings.value("Settings/tmpDir", d->settingsForm->getTempDirectory()).toString());
+    d->settingsForm->setMencoderPath(settings.value("Settings/mencoderPath", d->settingsForm->getMencoderPath()).toString());
+    d->settingsForm->setAudioBitrate(settings.value("Settings/audioBitrate", d->settingsForm->getAudioBitrate()).toInt());
+    d->audio->setVolume(settings.value("Settings/volume", 50).toInt());
 }
 
 
