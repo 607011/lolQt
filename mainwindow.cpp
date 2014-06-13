@@ -309,13 +309,14 @@ void MainWindow::analyzeMovie(const QString &fileName)
             d->tmpImageFiles.push_back(fqSavePath);
             d->movie->jumpToNextFrame();
         }
-        d->originalFPS = 1000 * d->movie->frameCount() / duration;
+        d->originalFPS = 1e3 * qreal(d->movie->frameCount()) / duration;
         d->fps = d->originalFPS;
         ui->statusBar->showMessage(tr("%1 frames, %2 fps, %3 ms")
                                    .arg(d->movie->frameCount())
-                                   .arg(qRound(d->originalFPS))
+                                   .arg(d->originalFPS, 0, 'g', 4)
                                    .arg(int(duration)), 3000);
-        enableSave();
+        if (!d->audioFilename.isEmpty())
+            enableSave();
         d->imageWidget->setMovie(d->movie);
         d->movie->start();
         calculateFPS();
@@ -334,6 +335,8 @@ void MainWindow::analyzeAudio(const QString &fileName)
     d->audio->play();
     ui->volumeDial->setEnabled(true);
     ui->statusBar->showMessage(tr("Audio loaded. Now set bpm accordingly!"), 10000);
+    if (d->movie->isValid() && d->movie->frameCount() > 0)
+        enableSave();
 }
 
 
