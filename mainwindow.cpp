@@ -95,13 +95,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(ui->actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-    for (int i = 100; i >= 0; i -= 10) {
-        QAction *action = new QAction(QString("%1%").arg(i), this);
-        action->setData(i);
-        ui->menuVolume->addAction(action);
-        QObject::connect(action, SIGNAL(triggered()), SLOT(setVolume()));
-    }
-
     restoreAppSettings();
     disableSave();
 }
@@ -234,8 +227,12 @@ void MainWindow::processErrorOutput(void)
 
 void MainWindow::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    Q_UNUSED(exitCode);
     Q_D(MainWindow);
-    ui->statusBar->showMessage(tr("Written video to \"%1\".").arg(d->settingsForm->getOutputFile()));
+    if (exitStatus == QProcess::NormalExit)
+        ui->statusBar->showMessage(tr("Written video to \"%1\".").arg(d->settingsForm->getOutputFile()));
+    else
+        ui->statusBar->showMessage(tr("Warning! MEncoder exited unexpectedly. Video may not have been written."));
     enableSave();
 }
 
