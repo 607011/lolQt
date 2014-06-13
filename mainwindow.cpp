@@ -205,6 +205,7 @@ void MainWindow::saveVideo(void)
     d->process->start(cmdLine);
     d->consoleWidget->clear();
     d->consoleWidget->show();
+    d->consoleWidget->out(cmdLine);
 }
 
 
