@@ -1,7 +1,7 @@
 # Copyright (c) 2014 Oliver Lau <ola@ct.de>, Heise Zeitschriften Verlag.
 # All rights reserved.
 
-QT       += core gui multimedia
+QT       += core gui multimedia concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

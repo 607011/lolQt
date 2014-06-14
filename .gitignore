@@ -1,5 +1,7 @@
 *.pro.user*
 *.gif
+*.mp3
+*.autosave
 
 # Compiled Object files
 *.slo

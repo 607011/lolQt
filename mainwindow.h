@@ -37,7 +37,7 @@ private slots:
     void analyzeMovie(const QString &fileName);
     void analyzeAudio(const QString &fileName);
     void durationChanged(qint64);
-    void bpmChanged(int);
+    void bpmChanged(double);
     void processOutput(void);
     void processErrorOutput(void);
     void processFinished(int, QProcess::ExitStatus);
@@ -46,6 +46,7 @@ private slots:
     void consoleClosed(void);
     void readAudioBuffer(void);
     void finishedAudioBuffer(void);
+    void countBeat(void);
 
 private: // methods
     void saveAppSettings(void);

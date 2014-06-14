@@ -16,7 +16,9 @@
 #include <QSettings>
 #include <QStringList>
 #include <QVector>
+#include <QTime>
 #include <QtCore/QDebug>
+
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -39,8 +41,12 @@ public:
         , originalFPS(0)
         , fps(0)
         , framesNeeded(0)
+        , beatCount(0)
         , frameFilenamePattern("%1-%2.png")
-    { /* ... */ }
+    {
+        beatSamplingTime.start();
+        beatInterval.start();
+    }
 
     SettingsForm *settingsForm;
     ImageWidget *imageWidget;
@@ -55,6 +61,9 @@ public:
     qreal originalFPS;
     qreal fps;
     int framesNeeded;
+    QTime beatInterval;
+    QTime beatSamplingTime;
+    int beatCount;
     // %1 original filename
     // %2 sequence number (4 digits)
     QString frameFilenamePattern;
@@ -93,11 +102,12 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->actionSettings, SIGNAL(triggered()), SLOT(showSettings()));
     QObject::connect(ui->actionViewConsole, SIGNAL(toggled(bool)), SLOT(showConsole(bool)));
     QObject::connect(ui->saveFramesButton, SIGNAL(clicked()), SLOT(saveVideo()));
+    QObject::connect(ui->beatMePushButton, SIGNAL(clicked()), SLOT(countBeat()));
     QObject::connect(d->imageWidget, SIGNAL(gifDropped(QString)), SLOT(analyzeMovie(QString)));
     QObject::connect(d->imageWidget, SIGNAL(musicDropped(QString)), SLOT(analyzeAudio(QString)));
     QObject::connect(d->consoleWidget, SIGNAL(closed()), SLOT(consoleClosed()));
     QObject::connect(d->audio, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
-    QObject::connect(ui->bpmSpinBox, SIGNAL(valueChanged(int)), SLOT(bpmChanged(int)));
+    QObject::connect(ui->bpmSpinBox, SIGNAL(valueChanged(double)), SLOT(bpmChanged(double)));
     QObject::connect(d->process, SIGNAL(readyReadStandardOutput()), SLOT(processOutput()));
     QObject::connect(d->process, SIGNAL(readyReadStandardError()), SLOT(processErrorOutput()));
     QObject::connect(d->process, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(processFinished(int,QProcess::ExitStatus)));
@@ -295,7 +305,7 @@ void MainWindow::durationChanged(qint64)
 }
 
 
-void MainWindow::bpmChanged(int)
+void MainWindow::bpmChanged(double)
 {
     calculateFPS();
 }
@@ -312,7 +322,8 @@ void MainWindow::analyzeMovie(const QString &fileName)
         qreal duration = 0;
         d->movie->jumpToFrame(0);
         for (int i = 0; i < d->movie->frameCount(); ++i) {
-            const QString &fqSavePath = d->settingsForm->getTempDirectory() +
+            const QString &fqSavePath =
+                    d->settingsForm->getTempDirectory() +
                     "/" +
                     d->frameFilenamePattern.arg(fi.baseName()).arg(i, 4, 10, QChar('0'));
             const QImage &frame = d->movie->currentImage();
@@ -345,7 +356,7 @@ void MainWindow::analyzeAudio(const QString &fileName)
 
     if (d->audioDecoder) {
         QObject::disconnect(d->audioDecoder, SIGNAL(bufferReady()));
-        QObject::disconnect(d->audioDecoder, SIGNAL(finishedAudioBuffer()));
+        QObject::disconnect(d->audioDecoder, SIGNAL(finished()));
         delete d->audioDecoder;
     }
     d->audioDecoder = new QAudioDecoder;
@@ -371,7 +382,7 @@ void MainWindow::analyzeAudio(const QString &fileName)
 void MainWindow::readAudioBuffer(void)
 {
     Q_D(MainWindow);
-    QAudioBuffer buf = d->audioDecoder->read();
+    const QAudioBuffer &buf = d->audioDecoder->read();
     if (!buf.isValid())
         return;
     d->waveWidget->append(buf);
@@ -380,7 +391,31 @@ void MainWindow::readAudioBuffer(void)
 
 void MainWindow::finishedAudioBuffer(void)
 {
-    qDebug() << "MainWindow::finishedAudioBuffer()";
+    Q_D(MainWindow);
+    d->waveWidget->finish();
+}
+
+
+void MainWindow::countBeat(void)
+{
+    Q_D(MainWindow);
+    if (d->beatInterval.elapsed() > 1 * 1000) {
+        ui->bpmSpinBox->setValue(0);
+        d->beatCount = 0;
+        d->beatSamplingTime.start();
+        d->beatInterval.start();
+        ui->bpmSpinBox->setStyleSheet("background-color: transparent");
+        ui->bpmSpinBox->setValue(121.0);
+    }
+    else {
+        ++d->beatCount;
+        if (d->beatSamplingTime.elapsed() > 0) {
+            qreal bpm = 1e3 * 60 * d->beatCount / d->beatSamplingTime.elapsed();
+            ui->bpmSpinBox->setValue(bpm);
+            ui->bpmSpinBox->setStyleSheet("background-color: #ffcc33");
+            d->beatInterval.start();
+        }
+    }
 }
 
 

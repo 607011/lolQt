@@ -23,6 +23,12 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>240</height>
+       </size>
+      </property>
       <property name="title">
        <string>Drop GIF/PNG and audio file here</string>
       </property>
@@ -41,18 +47,31 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="bpmSpinBox">
+       <widget class="QDoubleSpinBox" name="bpmSpinBox">
+        <property name="prefix">
+         <string/>
+        </property>
         <property name="suffix">
          <string> bpm</string>
         </property>
-        <property name="minimum">
+        <property name="decimals">
          <number>1</number>
         </property>
+        <property name="minimum">
+         <double>30.000000000000000</double>
+        </property>
         <property name="maximum">
-         <number>200</number>
+         <double>300.000000000000000</double>
         </property>
         <property name="value">
-         <number>121</number>
+         <double>121.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="beatMePushButton">
+        <property name="text">
+         <string>Beat me!</string>
         </property>
        </widget>
       </item>

@@ -14,7 +14,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QScopedPointer>
-
+#include <QSizePolicy>
 
 class ImageWidgetPrivate;
 
@@ -24,7 +24,8 @@ class ImageWidget : public QLabel
 
 public:
     explicit ImageWidget(QLabel *parent = NULL);
-    virtual QSize minimumSizeHint(void) const { return QSize(256, 256); }
+    QSizePolicy sizePolicy(void) const { return QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); }
+    QSize minimumSizeHint(void) const { return QSize(320, 240); }
 
 signals:
     void gifDropped(const QString &fileName);

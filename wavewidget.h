@@ -6,6 +6,7 @@
 
 #include <QWidget>
 #include <QPaintEvent>
+#include <QTimerEvent>
 #include <QAudioBuffer>
 #include <QScopedPointer>
 
@@ -22,14 +23,20 @@ class WaveWidget : public QWidget
 public:
     explicit WaveWidget(QWidget *parent = 0);
     ~WaveWidget();
-    virtual QSize sizeHint(void) const { return QSize(128, 16); }
+    QSize minimumSizeHint(void) const { return QSize(256, 64); }
+    QSize sizeHint(void) const { return QSize(256, 128); }
 
 public slots:
     void append(const QAudioBuffer&);
     void clear(void);
+    void finish(void);
 
 protected:
     void paintEvent(QPaintEvent*);
+    void timerEvent(QTimerEvent*);
+
+private: // methods
+    void drawWaveForm(void);
 
 private:
     Ui::WaveWidget *ui;
