@@ -10,10 +10,6 @@
 #include <QAudioBuffer>
 #include <QScopedPointer>
 
-namespace Ui {
-class WaveWidget;
-}
-
 class WaveWidgetPrivate;
 
 class WaveWidget : public QWidget
@@ -39,8 +35,6 @@ private: // methods
     void drawWaveForm(void);
 
 private:
-    Ui::WaveWidget *ui;
-
     QScopedPointer<WaveWidgetPrivate> d_ptr;
     Q_DECLARE_PRIVATE(WaveWidget)
     Q_DISABLE_COPY(WaveWidget)

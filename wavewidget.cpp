@@ -32,16 +32,14 @@ public:
 
 WaveWidget::WaveWidget(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::WaveWidget)
     , d_ptr(new WaveWidgetPrivate)
 {
-    ui->setupUi(this);
 }
 
 
 WaveWidget::~WaveWidget()
 {
-    delete ui;
+    // ...
 }
 
 

@@ -25,8 +25,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     settingsform.ui \
-    consolewidget.ui \
-    wavewidget.ui
+    consolewidget.ui
 
 OTHER_FILES += \
     .gitignore \
