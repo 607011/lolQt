@@ -5,7 +5,6 @@
 #include <QVector>
 #include <QPointF>
 #include <QImage>
-#include <QElapsedTimer>
 #include <QtConcurrent>
 #include <QtCore/QDebug>
 
@@ -46,8 +45,6 @@ WaveWidget::~WaveWidget()
 void WaveWidget::append(const QAudioBuffer &buf)
 {
     Q_D(WaveWidget);
-    QElapsedTimer timer;
-    timer.start();
     if (buf.format().sampleSize() == 16) {
         for (int i = 0; i < buf.sampleCount(); ++i)
             d->samples.append(buf.constData<qint16>()[i]);
