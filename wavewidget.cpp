@@ -19,8 +19,7 @@ public:
         , timerId(0)
         , backgroundColor(0x30, 0x30, 0x30)
     {
-        QPainter p(&waveForm);
-        p.fillRect(waveForm.rect(), backgroundColor);
+        waveForm.fill(backgroundColor);
     }
     QVector<qint16> samples;
     QImage waveForm;
