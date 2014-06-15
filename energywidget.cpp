@@ -68,7 +68,7 @@ void EnergyWidget::analyzeSamples(void)
         for (int i = 0; i < BinSize; ++i)
             *dst++ = *src++;
         memset(ysamples, 0, sizeof(qreal) * BinSize);
-        fft.DFT(xsamples, ysamples, FFT::Forward);
+        fft.DFT(xsamples, ysamples);
         qreal maxEnergy = 0;
         for (int i = 0; i < BinSize; ++i) {
             if (xsamples[i] > maxEnergy)

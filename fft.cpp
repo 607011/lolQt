@@ -11,7 +11,7 @@ FFT::FFT(int binSize)
 }
 
 
-void FFT::DFT(qreal *x1, qreal *y1, int dir)
+void FFT::DFT(qreal *x1, qreal *y1)
 {
     qreal *x2 = new qreal[m];
     qreal *y2 = new qreal[m];
@@ -19,7 +19,7 @@ void FFT::DFT(qreal *x1, qreal *y1, int dir)
     for (int i = 0 ; i < m ; ++i) {
         x2[i] = 0;
         y2[i] = 0;
-        qreal arg = -dir * 2 * M_PI * qreal(i) / qreal(m);
+        qreal arg = -2 * M_PI * qreal(i) / qreal(m);
         for (int k = 0; k < m; ++k) {
             qreal c = qCos(k * arg);
             qreal s = qSin(k * arg);
@@ -28,17 +28,9 @@ void FFT::DFT(qreal *x1, qreal *y1, int dir)
         }
     }
 
-    if (dir == 1) {
-        for (int i = 0 ; i < m ; ++i) {
-            x1[i] = x2[i] / qreal(m);
-            y1[i] = y2[i] / qreal(m);
-        }
-    }
-    else {
-        for (int i = 0; i < m; ++i) {
-            x1[i] = x2[i];
-            y1[i] = y2[i];
-        }
+    for (int i = 0 ; i < m ; ++i) {
+        x1[i] = x2[i] / qreal(m);
+        y1[i] = y2[i] / qreal(m);
     }
 
     delete [] x2;
