@@ -34,6 +34,7 @@ WaveWidget::WaveWidget(QWidget *parent)
     : QWidget(parent)
     , d_ptr(new WaveWidgetPrivate)
 {
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
 }
 
 
@@ -68,7 +69,7 @@ void WaveWidget::drawWaveForm(void)
 
 
 
-void WaveWidget::setSamples(SampleBuffer samples)
+void WaveWidget::setSamples(const SampleBuffer &samples)
 {
     Q_D(WaveWidget);
     d->samples = samples;
@@ -111,4 +112,6 @@ void WaveWidget::paintEvent(QPaintEvent*)
     QPainter p(this);
     p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     p.drawImage(rect(), d->waveForm);
+    if (d->drawFuture.isRunning())
+        p.fillRect(rect(), QColor(0x80, 0x80, 0x80, 0x80));
 }

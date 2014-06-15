@@ -9,12 +9,15 @@
 class FFT
 {
 public:
-    FFT(void);
+    FFT(int binSize);
 
     static const int Forward = 1;
     static const int Inverse = -1;
 
-    static bool DFT(int dir, long m, qreal *x1, qreal *y1);
+    void DFT(qreal *x1, qreal *y1, int dir = Forward);
+
+private:
+    int m;
 };
 
 #endif // __FFT_H_

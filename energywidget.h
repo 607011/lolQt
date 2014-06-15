@@ -19,11 +19,15 @@ class EnergyWidget : public QWidget
 public:
     explicit EnergyWidget(QWidget *parent = 0);
     ~EnergyWidget();
-    QSize sizeHint(void) const { return QSize(128, 32); }
-    QSize minimumSizeHint(void) const { return QSize(64, 16); }
-    void setSamples(SampleBuffer);
+    QSize sizeHint(void) const { return QSize(128, 128); }
+    QSize minimumSizeHint(void) const { return QSize(128, 64); }
+    void setSamples(const SampleBuffer&);
 
-    static const int BinSize = 256;
+    static const int BinSize = 128;
+
+    bool isActive(void) const;
+    void cancel(void);
+
 
 public slots:
 

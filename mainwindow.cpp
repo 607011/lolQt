@@ -88,6 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
     Q_D(MainWindow);
     ui->setupUi(this);
 
+    setWindowTitle(QString("%1 %2").arg(AppName).arg(AppVersion));
+
     QSettings::setDefaultFormat(QSettings::NativeFormat);
 
     QHBoxLayout *hbox1 = new QHBoxLayout;
@@ -149,6 +151,8 @@ void MainWindow::closeEvent(QCloseEvent *e)
     saveAppSettings();
     if (d->waveWidget->isActive())
         d->waveWidget->cancel();
+    if (d->energyWidget->isActive())
+        d->energyWidget->cancel();
     d->settingsForm->close();
     d->consoleWidget->close();
     e->accept();
@@ -404,6 +408,7 @@ void MainWindow::finishedAudioBuffer(void)
     Q_D(MainWindow);
     d->waveWidget->setSamples(d->samples);
     d->energyWidget->setSamples(d->samples);
+    ui->statusBar->showMessage(tr("Audio analysis running ..."));
 }
 
 

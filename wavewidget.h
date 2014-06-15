@@ -22,10 +22,10 @@ class WaveWidget : public QWidget
 public:
     explicit WaveWidget(QWidget *parent = 0);
     ~WaveWidget();
-    QSize minimumSizeHint(void) const { return QSize(256, 64); }
+    QSize minimumSizeHint(void) const { return QSize(128, 64); }
     QSize sizeHint(void) const { return QSize(256, 128); }
     bool isActive(void) const;
-    void setSamples(SampleBuffer);
+    void setSamples(const SampleBuffer&);
     void cancel(void);
 
 public slots:
