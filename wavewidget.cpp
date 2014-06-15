@@ -90,6 +90,8 @@ void WaveWidget::cancel(void)
     killTimer(d->timerId);
     d->timerId = 0;
     d->drawFuture.waitForFinished();
+    d->waveForm.fill(d->backgroundColor);
+    update();
 }
 
 

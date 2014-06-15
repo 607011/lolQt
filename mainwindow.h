@@ -54,6 +54,7 @@ private: // methods
     void enableSave(void);
     void disableSave(void);
     void calculateFPS(void);
+    void cancelAudioAnalysis();
 
 private: // variables
     Ui::MainWindow *ui;

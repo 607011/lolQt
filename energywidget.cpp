@@ -115,6 +115,9 @@ void EnergyWidget::cancel(void)
     Q_D(EnergyWidget);
     d->doCancel = true;
     d->analyzeFuture.waitForFinished();
+    d->spectrum.fill(0);
+    d->spectrum2.fill(0);
+    update();
 }
 
 

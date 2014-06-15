@@ -149,13 +149,21 @@ void MainWindow::closeEvent(QCloseEvent *e)
         d->process->close();
     }
     saveAppSettings();
+    cancelAudioAnalysis();
+    d->settingsForm->close();
+    d->consoleWidget->close();
+    e->accept();
+}
+
+
+void MainWindow::cancelAudioAnalysis(void)
+{
+    Q_D(MainWindow);
     if (d->waveWidget->isActive())
         d->waveWidget->cancel();
     if (d->energyWidget->isActive())
         d->energyWidget->cancel();
-    d->settingsForm->close();
-    d->consoleWidget->close();
-    e->accept();
+
 }
 
 
@@ -363,6 +371,8 @@ void MainWindow::analyzeMovie(const QString &fileName)
 void MainWindow::analyzeAudio(const QString &fileName)
 {
     Q_D(MainWindow);
+
+    cancelAudioAnalysis();
     d->audioFilename = fileName;
 
     if (d->audioDecoder) {
