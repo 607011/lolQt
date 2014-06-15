@@ -12,7 +12,6 @@
 #include "wavewidget.h"
 #include "ui_wavewidget.h"
 
-
 class WaveWidgetPrivate {
 public:
     WaveWidgetPrivate(void)
@@ -23,10 +22,11 @@ public:
         QPainter p(&waveForm);
         p.fillRect(waveForm.rect(), backgroundColor);
     }
-    QVector<qint16> samples;
+    SampleBuffer samples;
     QImage waveForm;
     int timerId;
     const QColor backgroundColor;
+    QFuture<void> drawFuture;
 };
 
 
@@ -40,25 +40,6 @@ WaveWidget::WaveWidget(QWidget *parent)
 WaveWidget::~WaveWidget()
 {
     // ...
-}
-
-
-void WaveWidget::append(const QAudioBuffer &buf)
-{
-    Q_D(WaveWidget);
-    QElapsedTimer timer;
-    timer.start();
-    if (buf.format().sampleSize() == 16) {
-        for (int i = 0; i < buf.sampleCount(); ++i)
-            d->samples.append(buf.constData<qint16>()[i]);
-    }
-}
-
-
-void WaveWidget::clear(void)
-{
-    Q_D(WaveWidget);
-    d->samples.clear();
 }
 
 
@@ -78,29 +59,48 @@ void WaveWidget::drawWaveForm(void)
         p1 = QPointF(x * xs, halfHeight * (1 + qreal(d->samples.at(x)) / 32678));
         p.drawLine(p0, p1);
         p0 = p1;
+        if (d->timerId == 0)
+            break;
     }
+    d->samples.clear();
     update();
-    clear();
 }
 
 
 
-void WaveWidget::finish(void)
+void WaveWidget::setSamples(SampleBuffer samples)
 {
     Q_D(WaveWidget);
+    d->samples = samples;
     d->timerId = startTimer(20);
-    QFuture<void> future = QtConcurrent::run(this, &WaveWidget::drawWaveForm);
-    Q_UNUSED(future);
+    d->drawFuture = QtConcurrent::run(this, &WaveWidget::drawWaveForm);
 }
 
 
-void WaveWidget::timerEvent(QTimerEvent*e)
+bool WaveWidget::isActive(void) const
+{
+    return d_ptr->drawFuture.isRunning();
+}
+
+
+void WaveWidget::cancel(void)
+{
+    Q_D(WaveWidget);
+    killTimer(d->timerId);
+    d->timerId = 0;
+    d->drawFuture.waitForFinished();
+}
+
+
+void WaveWidget::timerEvent(QTimerEvent *e)
 {
     Q_D(WaveWidget);
     if (e->timerId() == d->timerId) {
         update();
-        if (d->samples.count() == 0)
+        if (d->samples.count() == 0) {
             killTimer(d->timerId);
+            d->timerId = 0;
+        }
     }
 }
 

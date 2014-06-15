@@ -19,12 +19,12 @@
 #include <QTime>
 #include <QtCore/QDebug>
 
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "settingsform.h"
 #include "consolewidget.h"
 #include "wavewidget.h"
+#include "energywidget.h"
 
 class MainWindowPrivate
 {
@@ -34,6 +34,7 @@ public:
         , imageWidget(new ImageWidget)
         , consoleWidget(new ConsoleWidget)
         , waveWidget(new WaveWidget)
+        , energyWidget(new EnergyWidget)
         , process(new QProcess)
         , movie(new QMovie)
         , audio(new QMediaPlayer)
@@ -52,10 +53,12 @@ public:
     ImageWidget *imageWidget;
     ConsoleWidget *consoleWidget;
     WaveWidget *waveWidget;
+    EnergyWidget *energyWidget;
     QProcess *process;
     QMovie *movie;
     QMediaPlayer *audio;
     QAudioDecoder *audioDecoder;
+    SampleBuffer samples;
     QString audioFilename;
     QStringList tmpImageFiles;
     qreal originalFPS;
@@ -92,6 +95,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->originalGroupBox->setLayout(hbox1);
 
     ui->horizontalLayout2->addWidget(d->waveWidget);
+    ui->horizontalLayout2->addWidget(d->energyWidget);
 
     QObject::connect(ui->actionOpenImage, SIGNAL(triggered()), SLOT(openImage()));
     QObject::connect(ui->actionOpenAudio, SIGNAL(triggered()), SLOT(openAudio()));
@@ -143,6 +147,8 @@ void MainWindow::closeEvent(QCloseEvent *e)
         d->process->close();
     }
     saveAppSettings();
+    if (d->waveWidget->isActive())
+        d->waveWidget->cancel();
     d->settingsForm->close();
     d->consoleWidget->close();
     e->accept();
@@ -353,6 +359,7 @@ void MainWindow::analyzeMovie(const QString &fileName)
 void MainWindow::analyzeAudio(const QString &fileName)
 {
     Q_D(MainWindow);
+    d->audioFilename = fileName;
 
     if (d->audioDecoder) {
         QObject::disconnect(d->audioDecoder, SIGNAL(bufferReady()));
@@ -363,17 +370,15 @@ void MainWindow::analyzeAudio(const QString &fileName)
     QObject::connect(d->audioDecoder, SIGNAL(bufferReady()), SLOT(readAudioBuffer()));
     QObject::connect(d->audioDecoder, SIGNAL(finished()), SLOT(finishedAudioBuffer()));
 
-    d->waveWidget->clear();
+    d->samples.clear();
 
     d->audioDecoder->setSourceFilename(fileName);
     d->audioDecoder->start();
 
-    d->audioFilename = fileName;
     d->audio->setMedia(QUrl::fromLocalFile(fileName));
     d->audio->play();
 
     ui->volumeDial->setEnabled(true);
-    ui->statusBar->showMessage(tr("Audio loaded. Now set bpm accordingly!"), 10000);
     if (d->movie->isValid() && d->movie->frameCount() > 0)
         enableSave();
 }
@@ -385,14 +390,20 @@ void MainWindow::readAudioBuffer(void)
     const QAudioBuffer &buf = d->audioDecoder->read();
     if (!buf.isValid())
         return;
-    d->waveWidget->append(buf);
+    if (buf.format().sampleSize() == 8 * sizeof(SampleBufferType)) {
+        for (int i = 0; i < buf.sampleCount(); ++i)
+            d->samples.append(buf.constData<SampleBufferType>()[i]);
+        ui->statusBar->showMessage(tr("Decoding audio ... %1%")
+                                   .arg(100 * buf.startTime() / d->audioDecoder->duration()));
+    }
 }
 
 
 void MainWindow::finishedAudioBuffer(void)
 {
     Q_D(MainWindow);
-    d->waveWidget->finish();
+    d->waveWidget->setSamples(d->samples);
+    d->energyWidget->setSamples(d->samples);
 }
 
 

@@ -14,14 +14,19 @@ SOURCES += main.cpp\
     imagewidget.cpp \
     settingsform.cpp \
     consolewidget.cpp \
-    wavewidget.cpp
+    wavewidget.cpp \
+    fft.cpp \
+    energywidget.cpp
 
 HEADERS  += mainwindow.h \
     imagewidget.h \
     main.h \
     settingsform.h \
     consolewidget.h \
-    wavewidget.h
+    wavewidget.h \
+    fft.h \
+    energywidget.h \
+    types.h
 
 FORMS    += mainwindow.ui \
     settingsform.ui \

@@ -9,6 +9,9 @@
 #include <QTimerEvent>
 #include <QAudioBuffer>
 #include <QScopedPointer>
+#include <QVector>
+#include "types.h"
+
 
 class WaveWidgetPrivate;
 
@@ -21,11 +24,11 @@ public:
     ~WaveWidget();
     QSize minimumSizeHint(void) const { return QSize(256, 64); }
     QSize sizeHint(void) const { return QSize(256, 128); }
+    bool isActive(void) const;
+    void setSamples(SampleBuffer);
+    void cancel(void);
 
 public slots:
-    void append(const QAudioBuffer&);
-    void clear(void);
-    void finish(void);
 
 protected:
     void paintEvent(QPaintEvent*);
