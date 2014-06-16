@@ -23,7 +23,8 @@ public:
     QSize minimumSizeHint(void) const { return QSize(128, 64); }
     void setSamples(const SampleBuffer&);
 
-    static const int BinSize = 128;
+    static const int BinSize = 256;
+    static const int NBins = BinSize / 2 + 1;
 
     bool isActive(void) const;
     void cancel(void);

@@ -15,8 +15,8 @@ SOURCES += main.cpp\
     settingsform.cpp \
     consolewidget.cpp \
     wavewidget.cpp \
-    fft.cpp \
-    energywidget.cpp
+    energywidget.cpp \
+    kiss_fft.c
 
 HEADERS  += mainwindow.h \
     imagewidget.h \
@@ -24,9 +24,10 @@ HEADERS  += mainwindow.h \
     settingsform.h \
     consolewidget.h \
     wavewidget.h \
-    fft.h \
     energywidget.h \
-    types.h
+    types.h \
+    kiss_fft.h \
+    _kiss_fft_guts.h
 
 FORMS    += mainwindow.ui \
     settingsform.ui \

@@ -1,7 +1,6 @@
 // Copyright (c) 2014 Oliver Lau <ola@ct.de>, Heise Zeitschriften Verlag.
 // All rights reserved.
 
-#include "fft.h"
 #include "energywidget.h"
 #include <QPainter>
 #include <QVector>
@@ -11,13 +10,14 @@
 #include <QPainterPath>
 #include <QtCore/QDebug>
 #include "types.h"
+#include "kiss_fft.h"
 
 class EnergyWidgetPrivate {
 public:
     EnergyWidgetPrivate(void)
         : maxEnergy(0)
-        , spectrum(EnergyWidget::BinSize, 0)
-        , spectrum2(EnergyWidget::BinSize, 0)
+        , spectrum(EnergyWidget::NBins, 0)
+        , spectrum2(EnergyWidget::NBins, 0)
         , doCancel(false)
         , percentReady(0)
     { /* ... */ }
@@ -49,34 +49,33 @@ EnergyWidget::~EnergyWidget()
 void EnergyWidget::analyzeSamples(void)
 {
     Q_D(EnergyWidget);
-    QElapsedTimer timer;
-    timer.start();
-    FFT fft(BinSize);
-
-    qreal *xsamples = new qreal[BinSize];
-    qreal *ysamples = new qreal[BinSize];
-
-    SampleBuffer::const_iterator src = d->samples.constBegin();
-    int j = d->samples.count();
     QTime t0;
     t0.start();
+    kiss_fft_cfg cfg = kiss_fft_alloc(BinSize, 0, NULL, NULL);
+    kiss_fft_cpx in[BinSize];
+    kiss_fft_cpx out[BinSize];
+    SampleBuffer::const_iterator src = d->samples.constBegin();
+    int j = d->samples.count();
     while (!d->doCancel) {
         j -= BinSize;
-        if (j <= 0)
+        if (j < 0)
             break;
-        qreal *dst = xsamples;
-        for (int i = 0; i < BinSize; ++i)
-            *dst++ = *src++;
-        memset(ysamples, 0, sizeof(qreal) * BinSize);
-        fft.DFT(xsamples, ysamples);
-        qreal maxEnergy = 0;
+
         for (int i = 0; i < BinSize; ++i) {
-            if (xsamples[i] > maxEnergy)
-                maxEnergy = xsamples[i];
+            in[i].r = qreal(*src++) / 32678;
+            in[i].i = 0;
         }
-        for (int i = 0; i < BinSize; ++i) {
-            d->spectrum[i] = ysamples[i];
-            d->spectrum2[i] = xsamples[i];
+
+        kiss_fft(cfg, in, out);
+
+        qreal maxEnergy = 0;
+        for (int i = 0; i < NBins; ++i) {
+            if (out[i].r > maxEnergy)
+                maxEnergy = out[i].r;
+        }
+        for (int i = 0; i < NBins; ++i) {
+            d->spectrum[i] = out[i].r;
+            d->spectrum2[i] = out[i].i;
         }
         if (t0.elapsed() > 40) {
             update();
@@ -84,11 +83,8 @@ void EnergyWidget::analyzeSamples(void)
         }
         d->percentReady = 100 * (d->samples.count() - j) / d->samples.count();
     }
-
-    delete [] xsamples;
-    delete [] ysamples;
-    qDebug() << "EnergyWidget::setSamples() took" << timer.elapsed() << "ms.";
-
+    free(cfg);
+    kiss_fft_cleanup();
 }
 
 
@@ -99,8 +95,6 @@ void EnergyWidget::setSamples(const SampleBuffer &samples)
     d->samples = samples;
     d->analyzeFuture = QtConcurrent::run(this, &EnergyWidget::analyzeSamples);
 }
-
-
 
 
 bool EnergyWidget::isActive(void) const
@@ -125,20 +119,20 @@ void EnergyWidget::paintEvent(QPaintEvent*)
 {
     Q_D(EnergyWidget);
     static const int xd = 4;
-    qreal xs = qreal(width()) / BinSize;
-    qreal ys = qreal(height()) / 32768 * xd * 2;
+    qreal xs = qreal(width()) / (NBins - 1);
+    qreal ys = 0.5 * qreal(height());
     QPainter p(this);
     p.fillRect(rect(), QColor(0x40, 0x30, 0x00));
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen(Qt::NoPen);
     p.setBrush(QColor(0xee, 0xcc, 0x33, 0xc0));
     QPainterPath path1;
-    for (int i = 0; i < BinSize / xd; ++i)
+    for (int i = 0; i < NBins / xd; ++i)
         path1.addRect(xd * (i - 1) * xs, height(), xd * xs, -qAbs(d->spectrum[i] * ys));
     p.drawPath(path1);
     p.setBrush(QColor(0xcc, 0x33, 0xee, 0xc0));
     QPainterPath path2;
-    for (int i = 0; i < BinSize / xd; ++i)
+    for (int i = 0; i < NBins / xd; ++i)
         path2.addRect(xd * (i - 1) * xs, 0, xd * xs, qAbs(d->spectrum2[i] * ys));
     p.drawPath(path2);
     if (d->analyzeFuture.isRunning()) {
