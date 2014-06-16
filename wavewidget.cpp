@@ -55,9 +55,10 @@ void WaveWidget::drawWaveForm(void)
     const qreal halfHeight = 0.5 * d->waveForm.height();
     QPointF p0(0, halfHeight);
     QPointF p1;
-    const qreal xs = qreal(d->waveForm.width()) / qreal(d->samples.count());
-    for (int x = 0; x < d->samples.count(); ++x) {
-        p1 = QPointF(x * xs, halfHeight * (1 + qreal(d->samples.at(x)) / 32678));
+    const qreal xs = qreal(d->waveForm.width()) / qreal(d->samples.size());
+    const qreal ys = qreal(halfHeight) / (2 >> (sizeof(SampleBufferType) - 1));
+    for (int x = 0; x < d->samples.size(); ++x) {
+        p1 = QPointF(x * xs, halfHeight + ys * d->samples.at(x));
         p.drawLine(p0, p1);
         p0 = p1;
         if (d->timerId == 0)
@@ -100,7 +101,7 @@ void WaveWidget::timerEvent(QTimerEvent *e)
     Q_D(WaveWidget);
     if (e->timerId() == d->timerId) {
         update();
-        if (d->samples.count() == 0) {
+        if (d->samples.size() == 0) {
             killTimer(d->timerId);
             d->timerId = 0;
         }
