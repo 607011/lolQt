@@ -27,7 +27,8 @@ HEADERS  += mainwindow.h \
     energywidget.h \
     types.h \
     kiss_fft.h \
-    _kiss_fft_guts.h
+    _kiss_fft_guts.h \
+    fft.h
 
 FORMS    += mainwindow.ui \
     settingsform.ui \

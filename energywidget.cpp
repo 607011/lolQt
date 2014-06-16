@@ -10,7 +10,7 @@
 #include <QPainterPath>
 #include <QtCore/QDebug>
 #include "types.h"
-#include "kiss_fft.h"
+#include "fft.h"
 
 class EnergyWidgetPrivate {
 public:
@@ -51,40 +51,37 @@ void EnergyWidget::analyzeSamples(void)
     Q_D(EnergyWidget);
     QTime t0;
     t0.start();
-    kiss_fft_cfg cfg = kiss_fft_alloc(BinSize, 0, NULL, NULL);
-    kiss_fft_cpx in[BinSize];
-    kiss_fft_cpx out[BinSize];
+    FFT<qint16> fft(BinSize);
+    kiss_fft_cpx spectrum[BinSize];
     SampleBuffer::const_iterator src = d->samples.constBegin();
-    int j = d->samples.count();
+    d->percentReady = 0;
+    int j = 0;
     while (!d->doCancel) {
-        j -= BinSize;
-        if (j < 0)
+        j += BinSize;
+        if (j > d->samples.size())
             break;
 
-        for (int i = 0; i < BinSize; ++i) {
-            in[i].r = qreal(*src++) / 32678;
-            in[i].i = 0;
+        fft.perform(src, spectrum);
+        for (int i = 0; i < NBins; ++i) {
+            d->spectrum[i] = spectrum[i].r;
+            d->spectrum2[i] = spectrum[i].i;
         }
-
-        kiss_fft(cfg, in, out);
+        src += BinSize;
 
         qreal maxEnergy = 0;
         for (int i = 0; i < NBins; ++i) {
-            if (out[i].r > maxEnergy)
-                maxEnergy = out[i].r;
+            if (spectrum[i].r > maxEnergy)
+                maxEnergy = spectrum[i].r;
         }
-        for (int i = 0; i < NBins; ++i) {
-            d->spectrum[i] = out[i].r;
-            d->spectrum2[i] = out[i].i;
-        }
+
         if (t0.elapsed() > 40) {
+            d->percentReady = 100 * j / d->samples.size();
             update();
             t0.start();
         }
-        d->percentReady = 100 * (d->samples.count() - j) / d->samples.count();
     }
-    free(cfg);
-    kiss_fft_cleanup();
+    d->percentReady = 100;
+    update();
 }
 
 
@@ -120,9 +117,9 @@ void EnergyWidget::paintEvent(QPaintEvent*)
     Q_D(EnergyWidget);
     static const int xd = 4;
     qreal xs = qreal(width()) / (NBins - 1);
-    qreal ys = 0.5 * qreal(height());
+    qreal ys = qreal(height()) * 1e-6;
     QPainter p(this);
-    p.fillRect(rect(), QColor(0x40, 0x30, 0x00));
+    p.fillRect(rect(), QColor(0x30, 0x20, 0x10));
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen(Qt::NoPen);
     p.setBrush(QColor(0xee, 0xcc, 0x33, 0xc0));
