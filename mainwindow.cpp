@@ -9,6 +9,7 @@
 #include <QAudioFormat>
 #include <QAudioDecoder>
 #include <QAudioBuffer>
+#include <QAudioProbe>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -39,6 +40,7 @@ public:
         , movie(new QMovie)
         , audio(new QMediaPlayer)
         , audioDecoder(0)
+        , probe(new QAudioProbe)
         , originalFPS(0)
         , fps(0)
         , framesNeeded(0)
@@ -47,6 +49,7 @@ public:
     {
         beatSamplingTime.start();
         beatInterval.start();
+        probe->setSource(audio);
     }
 
     SettingsForm *settingsForm;
@@ -58,6 +61,7 @@ public:
     QMovie *movie;
     QMediaPlayer *audio;
     QAudioDecoder *audioDecoder;
+    QAudioProbe *probe;
     SampleBuffer samples;
     QString audioFilename;
     QStringList tmpImageFiles;
@@ -76,6 +80,7 @@ public:
         delete movie;
         delete audio;
         delete audioDecoder;
+        delete probe;
     }
 };
 
@@ -113,6 +118,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(d->imageWidget, SIGNAL(musicDropped(QString)), SLOT(analyzeAudio(QString)));
     QObject::connect(d->consoleWidget, SIGNAL(closed()), SLOT(consoleClosed()));
     QObject::connect(d->audio, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
+    QObject::connect(d->probe, SIGNAL(audioBufferProbed(QAudioBuffer)), SLOT(audioBufferReady(QAudioBuffer)));
     QObject::connect(ui->bpmSpinBox, SIGNAL(valueChanged(double)), SLOT(bpmChanged(double)));
     QObject::connect(d->process, SIGNAL(readyReadStandardOutput()), SLOT(processOutput()));
     QObject::connect(d->process, SIGNAL(readyReadStandardError()), SLOT(processErrorOutput()));
@@ -272,6 +278,12 @@ void MainWindow::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     else
         ui->statusBar->showMessage(tr("Warning! MEncoder exited unexpectedly. Video may not have been written."));
     enableSave();
+}
+
+
+void MainWindow::audioBufferReady(const QAudioBuffer &buf)
+{
+    qDebug() << buf.startTime() << buf.duration() << buf.sampleCount();
 }
 
 

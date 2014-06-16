@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QProcess>
 #include <QScopedPointer>
+#include <QAudioBuffer>
 #include "imagewidget.h"
 #include "main.h"
 
@@ -41,6 +42,7 @@ private slots:
     void processOutput(void);
     void processErrorOutput(void);
     void processFinished(int, QProcess::ExitStatus);
+    void audioBufferReady(const QAudioBuffer&);
     void setVolume(void);
     void showConsole(bool);
     void consoleClosed(void);
