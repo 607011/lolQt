@@ -47,25 +47,24 @@ WaveWidget::~WaveWidget()
 void WaveWidget::drawWaveForm(void)
 {
     Q_D(WaveWidget);
+    QElapsedTimer t;
+    t.start();
     QPainter p(&d->waveForm);
     p.fillRect(d->waveForm.rect(), d->backgroundColor);
     p.setRenderHint(QPainter::Antialiasing);
     p.setBrush(Qt::transparent);
-    p.setPen(QPen(QBrush(Qt::green), 0.1));
+    p.setPen(QPen(QBrush(QColor(0x33, 0xcc, 0x44)), 0.1));
     const qreal halfHeight = 0.5 * d->waveForm.height();
-    QPointF p0(0, halfHeight);
-    QPointF p1;
     const qreal xs = qreal(d->waveForm.width()) / qreal(d->samples.size());
-    const qreal ys = qreal(halfHeight) / (2 >> (sizeof(SampleBufferType) - 1));
+    const qreal ys = qreal(halfHeight) / (2 << (8 * sizeof(SampleBufferType) - 2));
     for (int x = 0; x < d->samples.size(); ++x) {
-        p1 = QPointF(x * xs, halfHeight + ys * d->samples.at(x));
-        p.drawLine(p0, p1);
-        p0 = p1;
+        p.drawPoint(QPointF(x * xs, halfHeight + ys * d->samples.at(x)));
         if (d->timerId == 0)
             break;
     }
     d->samples.clear();
     update();
+    qDebug() << "WaveWidget::drawWaveForm() took" << t.elapsed() << "ms";
 }
 
 
