@@ -74,7 +74,7 @@ void WaveWidget::setSamples(const SampleBuffer &samples)
 {
     Q_D(WaveWidget);
     d->samples = samples;
-    d->timerId = startTimer(20);
+    d->timerId = startTimer(40);
     d->drawFuture = QtConcurrent::run(this, &WaveWidget::drawWaveForm);
 }
 
