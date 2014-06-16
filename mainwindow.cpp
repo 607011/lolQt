@@ -159,11 +159,8 @@ void MainWindow::closeEvent(QCloseEvent *e)
 void MainWindow::cancelAudioAnalysis(void)
 {
     Q_D(MainWindow);
-    if (d->waveWidget->isActive())
-        d->waveWidget->cancel();
-    if (d->energyWidget->isActive())
-        d->energyWidget->cancel();
-
+    d->waveWidget->cancel();
+    d->energyWidget->cancel();
 }
 
 
