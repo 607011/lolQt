@@ -62,7 +62,7 @@ void EnergyWidget::analyzeSamples(void)
     SampleBuffer::const_iterator src = d->samples.constBegin();
     d->position = 0;
     d->percentReady = 0;
-    int j = 0;
+    qint64 j = 0;
     while (!d->doCancel) {
         j += BinSize;
         if (j > d->samples.size())
@@ -82,7 +82,7 @@ void EnergyWidget::analyzeSamples(void)
         }
 
         if (t0.elapsed() > 40) {
-            d->percentReady = 100 * j / d->samples.size();
+            d->percentReady = int(100 * j / d->samples.size());
             update();
             t0.start();
         }
