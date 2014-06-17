@@ -1,5 +1,5 @@
-gifexploder
-===========
+lolqt
+=====
 
 Merge animated GIFs and background music into video
 
