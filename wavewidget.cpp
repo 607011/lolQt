@@ -65,7 +65,6 @@ void WaveWidget::drawWaveForm(void)
     }
     d->samples.clear();
     update();
-    qDebug() << "WaveWidget::drawWaveForm() took" << t.elapsed() << "ms";
 }
 
 
