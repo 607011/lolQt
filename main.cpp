@@ -3,6 +3,8 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QTranslator>
+#include <QtCore/QDebug>
 
 const QString Company = "c't";
 const QString AppName = "lolqt";
@@ -22,6 +24,27 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
+    qApp->addLibraryPath("plugins");
+    qApp->addLibraryPath("./plugins");
+
+#ifdef Q_OS_MAC
+    qApp->addLibraryPath("../plugins");
+#endif
+
+#ifndef QT_NO_DEBUG
+    qDebug() << qApp->libraryPaths();
+#endif
+
+    qDebug() << "locale:" << QLocale::system().name();
+    QTranslator translator;
+    bool ok = translator.load(":/translations/lolqt-" + QLocale::system().name());
+#ifndef QT_NO_DEBUG
+    if (!ok)
+        qWarning() << "Could not load translations for" << QLocale::system().name() << "locale";
+#endif
+    if (ok)
+        a.installTranslator(&translator);
+
     w.show();
     return a.exec();
 }

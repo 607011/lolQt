@@ -5,9 +5,10 @@ QT       += core gui multimedia concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = GifExploder
+TARGET = lolqt
 TEMPLATE = app
 
+TRANSLATIONS = lolqt-de_DE.ts
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -37,3 +38,6 @@ FORMS    += mainwindow.ui \
 OTHER_FILES += \
     .gitignore \
     README.md
+
+RESOURCES += \
+    lolqt.qrc

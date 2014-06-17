@@ -2,6 +2,7 @@
 *.gif
 *.mp3
 *.autosave
+*.qm
 
 # Compiled Object files
 *.slo
