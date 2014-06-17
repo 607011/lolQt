@@ -2,12 +2,10 @@
 !define APP "lolqt"
 !define PUBLISHER "c't"
 
-!include x64.nsh
-
 Name "${APP} ${VERSION}"
 OutFile "${APP}-${VERSION}-setup.exe"
-InstallDir $PROGRAMFILES\${APP}-${VERSION}
-InstallDirRegKey HKLM "Software\${PUBLISHER}\${APP}-${VERSION}" "Install_Dir"
+InstallDir $PROGRAMFILES\${APP}
+InstallDirRegKey HKLM "Software\${PUBLISHER}\${APP}" "Install_Dir"
 RequestExecutionLevel admin
 SetCompressor lzma
 ShowInstDetails show
@@ -21,9 +19,9 @@ Page directory
 Page instfiles
 
 
-Section "Visual Studio 2012 edistributables"
-  File D:\Developer\Qt-5.3\vcredist\vcredist_sp1_x86.exe
-SectionEnd
+;Section "Visual Studio 2012 edistributables"
+;  File D:\Developer\Qt-5.3\vcredist\vcredist_sp1_x86.exe
+;SectionEnd
 
 Section "lolqt"
 
@@ -31,11 +29,13 @@ Section "lolqt"
 ;  StrCmp $1 1 vcredist_installed
 ;  DetailPrint "Installing Visual Studio 2010 Redistributable (x86) ..."
 ;  ExecWait 'vcredist_sp1_x86.exe'
-vcredist_installed:
+;vcredist_installed:
 
   SetOutPath $INSTDIR
   CreateDirectory $INSTDIR\plugins
   CreateDirectory $INSTDIR\plugins\imageformats
+  CreateDirectory $INSTDIR\platforms
+  CreateDirectory $INSTDIR\mediaservice
   CreateDirectory $INSTDIR\sampledata
   File v${VERSION}\lolqt.exe
   File v${VERSION}\lolqt.exe.embed.manifest
@@ -51,20 +51,26 @@ vcredist_installed:
   File ..\LICENSE
   File /oname=sampledata\cat.gif sampledata\thirsty-cat.gif
   File /oname=plugins\imageformats\qgif.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\imageformats\qgif.dll
+  File /oname=platforms\qminimal.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\platforms\qminimal.dll
+  File /oname=platforms\qwindows.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\platforms\qwindows.dll
+  File /oname=mediaservice\dsengine.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\mediaservice\dsengine.dll
+  File /oname=mediaservice\qtmedia_audioengine.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\mediaservice\qtmedia_audioengine.dll
+  File /oname=mediaservice\wmfengine.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\mediaservice\wmfengine.dll
   WriteUninstaller $INSTDIR\uninstall.exe
 SectionEnd
 
 
 Section "Start Menu Shortcuts"
   CreateDirectory "$SMPROGRAMS\${APP}"
-  CreateShortCut "$SMPROGRAMS\${APP}\${APP} ${VERSION}.lnk" "$INSTDIR\lolqt.exe"
+  CreateShortCut "$SMPROGRAMS\${APP}\${APP} ${VERSION}.lnk" "$INSTDIR\${APP}.exe"
   CreateShortcut "$SMPROGRAMS\${APP}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 SectionEnd
 
 
 Section "Uninstall"
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\lolqt"
-  DeleteRegKey HKLM SOFTWARE\lolqt
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP}"
+  DeleteRegKey HKLM SOFTWARE\${APP}
+
   Delete $INSTDIR\lolqt.exe
   Delete $INSTDIR\LICENSE
   Delete $INSTDIR\uninstall.exe
@@ -78,12 +84,25 @@ Section "Uninstall"
   Delete $INSTDIR\Qt5Multimedia.dll
   Delete $INSTDIR\Qt5Network.dll
   Delete $INSTDIR\Qt5Widgets.dll
+
+  Delete $INSTDIR\mediaservice\dsengine.dll
+  Delete $INSTDIR\mediaservice\qtmedia_audioengine.dll
+  Delete $INSTDIR\mediaservice\wmfengine.dll
+  RMDir $INSTDIR\mediaservice
+
+  Delete $INSTDIR\platforms\qminimal.dll
+  Delete $INSTDIR\platforms\qwindows.dll
+  RMDir $INSTDIR\platforms
+
   Delete $INSTDIR\plugins\imageformats\qgif.dll
   RMDir $INSTDIR\plugins\imageformats
+
   RMDir $INSTDIR\plugins
+
   Delete $INSTDIR\sampledata\thirsty-cat.gif
   RMDir $INSTDIR\sampledata
   RMDir $INSTDIR
+
   Delete "$SMPROGRAMS\lolqt\*.*"
   RMDir "$SMPROGRAMS\lolqt"
   RMDir "$INSTDIR"
