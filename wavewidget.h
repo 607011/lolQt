@@ -25,10 +25,12 @@ public:
     QSize minimumSizeHint(void) const { return QSize(128, 64); }
     QSize sizeHint(void) const { return QSize(256, 128); }
     bool isActive(void) const;
-    void setSamples(const SampleBuffer&);
+    void setSamples(const SampleBuffer &samples, qint64 duration);
     void cancel(void);
 
 public slots:
+    void setPosition(qint64);
+    void setDuration(qint64);
 
 protected:
     void paintEvent(QPaintEvent*);

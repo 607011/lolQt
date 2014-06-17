@@ -118,6 +118,10 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(d->imageWidget, SIGNAL(musicDropped(QString)), SLOT(analyzeAudio(QString)));
     QObject::connect(d->consoleWidget, SIGNAL(closed()), SLOT(consoleClosed()));
     QObject::connect(d->audio, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
+    QObject::connect(d->audio, SIGNAL(durationChanged(qint64)), d->waveWidget, SLOT(setDuration(qint64)));
+    QObject::connect(d->audio, SIGNAL(positionChanged(qint64)), d->waveWidget, SLOT(setPosition(qint64)));
+    QObject::connect(d->audio, SIGNAL(durationChanged(qint64)), d->energyWidget, SLOT(setDuration(qint64)));
+    QObject::connect(d->audio, SIGNAL(positionChanged(qint64)), d->energyWidget, SLOT(setPosition(qint64)));
     QObject::connect(d->probe, SIGNAL(audioBufferProbed(QAudioBuffer)), SLOT(audioBufferReady(QAudioBuffer)));
     QObject::connect(ui->bpmSpinBox, SIGNAL(valueChanged(double)), SLOT(bpmChanged(double)));
     QObject::connect(d->process, SIGNAL(readyReadStandardOutput()), SLOT(processOutput()));
@@ -425,7 +429,7 @@ void MainWindow::readAudioBuffer(void)
 void MainWindow::finishedAudioBuffer(void)
 {
     Q_D(MainWindow);
-    d->waveWidget->setSamples(d->samples);
+    d->waveWidget->setSamples(d->samples, d->audio->duration());
     d->energyWidget->setSamples(d->samples);
     ui->statusBar->showMessage(tr("Audio analysis running ..."));
 }
