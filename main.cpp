@@ -5,8 +5,8 @@
 #include <QApplication>
 
 const QString Company = "c't";
-const QString AppName = "GifExploder";
-const QString AppUrl = "https://github.com/ola-ct/gifexploder";
+const QString AppName = "lolct";
+const QString AppUrl = "https://github.com/ola-ct/lolct";
 const QString AppAuthor = "Oliver Lau";
 const QString AppAuthorMail = "ola@ct.de";
 const QString AppVersionNoDebug = "1.0";
