@@ -431,7 +431,7 @@ void MainWindow::finishedAudioBuffer(void)
     Q_D(MainWindow);
     d->waveWidget->setSamples(d->samples, d->audio->duration());
     d->energyWidget->setSamples(d->samples);
-    ui->statusBar->showMessage(tr("Audio analysis running ..."));
+    ui->statusBar->showMessage(tr("Analyzing audio ..."));
 }
 
 
