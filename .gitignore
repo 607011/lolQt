@@ -3,6 +3,8 @@
 *.mp3
 *.autosave
 *.qm
+deploy/*/*.dll
+deploy/*/*.exe*
 
 # Compiled Object files
 *.slo
