@@ -10,7 +10,6 @@
 #include <QtCore/QDebug>
 
 #include "wavewidget.h"
-#include "ui_wavewidget.h"
 
 class WaveWidgetPrivate {
 public:
