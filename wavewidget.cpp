@@ -5,7 +5,6 @@
 #include <QVector>
 #include <QPointF>
 #include <QImage>
-#include <QElapsedTimer>
 #include <QtConcurrent>
 #include <QtCore/QDebug>
 
@@ -20,8 +19,7 @@ public:
         , duration(0)
         , position(0)
     {
-        QPainter p(&waveForm);
-        p.fillRect(waveForm.rect(), backgroundColor);
+        waveForm.fill(backgroundColor);
     }
     SampleBuffer samples;
     QImage waveForm;
