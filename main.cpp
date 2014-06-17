@@ -35,7 +35,6 @@ int main(int argc, char *argv[])
     qDebug() << qApp->libraryPaths();
 #endif
 
-    qDebug() << "locale:" << QLocale::system().name();
     QTranslator translator;
     bool ok = translator.load(":/translations/lolqt-" + QLocale::system().name());
 #ifndef QT_NO_DEBUG
