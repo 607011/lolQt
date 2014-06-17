@@ -31,6 +31,8 @@ public:
 
 
 public slots:
+    void setPosition(qint64);
+    void setDuration(qint64);
 
 signals:
 

@@ -16,19 +16,25 @@ class EnergyWidgetPrivate {
 public:
     EnergyWidgetPrivate(void)
         : maxEnergy(0)
+        , fft(EnergyWidget::BinSize)
         , spectrum(EnergyWidget::NBins, 0)
         , spectrum2(EnergyWidget::NBins, 0)
         , doCancel(false)
         , percentReady(0)
+        , duration(0)
+        , position(0)
     { /* ... */ }
 
     qreal maxEnergy;
     SampleBuffer samples;
+    FFT<qint16> fft;
     QVector<qreal> spectrum;
     QVector<qreal> spectrum2;
     QFuture<void> analyzeFuture;
     bool doCancel;
     int percentReady;
+    qint64 duration;
+    qint64 position;
 };
 
 
@@ -37,6 +43,7 @@ EnergyWidget::EnergyWidget(QWidget *parent)
     , d_ptr(new EnergyWidgetPrivate)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+    setMaximumWidth(256);
 }
 
 
@@ -51,9 +58,9 @@ void EnergyWidget::analyzeSamples(void)
     Q_D(EnergyWidget);
     QTime t0;
     t0.start();
-    FFT<qint16> fft(BinSize);
     kiss_fft_cpx spectrum[BinSize];
     SampleBuffer::const_iterator src = d->samples.constBegin();
+    d->position = 0;
     d->percentReady = 0;
     int j = 0;
     while (!d->doCancel) {
@@ -61,7 +68,7 @@ void EnergyWidget::analyzeSamples(void)
         if (j > d->samples.size())
             break;
 
-        fft.perform(src, spectrum);
+        d->fft.perform(src, spectrum);
         for (int i = 0; i < NBins; ++i) {
             d->spectrum[i] = spectrum[i].r;
             d->spectrum2[i] = spectrum[i].i;
@@ -89,8 +96,25 @@ void EnergyWidget::setSamples(const SampleBuffer &samples)
 {
     Q_D(EnergyWidget);
     d->doCancel = false;
+    d->position = 0;
     d->samples = samples;
     d->analyzeFuture = QtConcurrent::run(this, &EnergyWidget::analyzeSamples);
+}
+
+
+void EnergyWidget::setPosition(qint64 position)
+{
+    Q_D(EnergyWidget);
+    d->position = position;
+    update();
+}
+
+
+void EnergyWidget::setDuration(qint64 duration)
+{
+    Q_D(EnergyWidget);
+    d->duration = duration;
+    update();
 }
 
 
@@ -100,7 +124,6 @@ bool EnergyWidget::isActive(void) const
 }
 
 
-
 void EnergyWidget::cancel(void)
 {
     Q_D(EnergyWidget);
@@ -108,6 +131,7 @@ void EnergyWidget::cancel(void)
     d->analyzeFuture.waitForFinished();
     d->spectrum.fill(0);
     d->spectrum2.fill(0);
+    d->position = 0;
     update();
 }
 
@@ -138,4 +162,3 @@ void EnergyWidget::paintEvent(QPaintEvent*)
         p.drawText(QRect(padding, padding, width() - padding * 2, height() - padding * 2), Qt::AlignRight | Qt::AlignBottom, QString("%1%").arg(d->percentReady));
     }
 }
-
