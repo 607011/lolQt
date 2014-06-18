@@ -9,7 +9,7 @@
 
 ## Installation
 
-Download [lolQt-1.0.1-setup.exe](https://drive.google.com/folderview?id=0B3S-OBO0P8GMMlJZNzFLVDY2bFE&usp=sharing), run it, and follow the instructions.
+ [Download](https://drive.google.com/folderview?id=0B3S-OBO0P8GMMlJZNzFLVDY2bFE&usp=sharing) the most recent version of the installer, run it, and follow the instructions.
 
 ## Usage in a nutshell
 
