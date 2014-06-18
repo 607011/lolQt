@@ -15,7 +15,7 @@
 class WaveWidgetPrivate {
 public:
     WaveWidgetPrivate(void)
-        : waveForm(16 * 1024, 128, QImage::Format_RGB32)
+        : waveForm(8 * 1024, 128, QImage::Format_RGB32)
         , defaultWaveform(":/images/waveform.png")
         , displayedWaveForm(&defaultWaveform)
         , timerId(0)
@@ -24,7 +24,7 @@ public:
         , duration(0)
         , position(0)
     {
-        resetWaveform();
+        // ...
     }
     SampleBuffer samples;
     QImage waveForm;
@@ -87,7 +87,6 @@ void WaveWidget::drawWaveForm(void)
     update();
     emit analysisCompleted();
 }
-
 
 
 void WaveWidget::setSamples(const SampleBuffer &samples, qint64 duration)
@@ -156,11 +155,9 @@ void WaveWidget::paintEvent(QPaintEvent*)
     d->drawMutex.lock();
     p.drawImage(rect(), *d->displayedWaveForm);
     d->drawMutex.unlock();
-//    if (d->drawFuture.isRunning())
-//        p.fillRect(rect(), QColor(0x80, 0x80, 0x80, 0x80));
     if (d->position > 0 && d->duration > 0) {
         p.setPen(QColor(0xff, 0x22, 0x33));
-        int x = width() * d->position / d->duration;
+        const int x = int(width() * d->position / d->duration);
         p.drawLine(QPoint(x, 0), QPoint(x, height()));
     }
 }
