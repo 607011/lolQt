@@ -66,10 +66,9 @@ void WaveWidget::drawWaveForm(void)
         if (d->cancelDraw)
             break;
         d->drawMutex.unlock();
-        int nRemainingSamples = qMin(SampleStep, d->samples.size() - i);
-        for (int j = 0; j < nRemainingSamples; ++j) {
-            int x = i + j;
-            p.drawPoint(QPointF(x * xs, halfHeight + ys * d->samples.at(x)));
+        const int EndStep = qMin(SampleStep + i, d->samples.size());
+        for (int j = i; j < EndStep; ++j) {
+            p.drawPoint(QPointF(j * xs, halfHeight + ys * d->samples.at(j)));
         }
     }
     d->samples.clear();
