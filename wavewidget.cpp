@@ -65,6 +65,7 @@ void WaveWidget::drawWaveForm(void)
     }
     d->samples.clear();
     update();
+    emit analysisCompleted();
 }
 
 

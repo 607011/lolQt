@@ -28,6 +28,9 @@ public:
     void setSamples(const SampleBuffer &samples, qint64 duration);
     void cancel(void);
 
+signals:
+    void analysisCompleted(void);
+
 public slots:
     void setPosition(qint64);
     void setDuration(qint64);

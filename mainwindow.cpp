@@ -102,6 +102,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->originalGroupBox->setLayout(hbox1);
 
     ui->horizontalLayout2->addWidget(d->waveWidget);
+    QObject::connect(d->waveWidget, SIGNAL(analysisCompleted()), SLOT(analysisCompleted()));
+
 #ifndef QT_NO_DEBUG
     ui->horizontalLayout2->addWidget(d->energyWidget);
 #endif
@@ -431,10 +433,17 @@ void MainWindow::readAudioBuffer(void)
 void MainWindow::finishedAudioBuffer(void)
 {
     Q_D(MainWindow);
+    ui->statusBar->showMessage(tr("Analyzing audio ..."));
     d->waveWidget->setSamples(d->samples, d->audio->duration());
     d->energyWidget->setSamples(d->samples);
-    ui->statusBar->showMessage(tr("Analyzing audio ..."));
 }
+
+
+void MainWindow::analysisCompleted(void)
+{
+    ui->statusBar->showMessage(tr("Analysis complete."), 2000);
+}
+
 
 
 void MainWindow::countBeat(void)

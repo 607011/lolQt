@@ -49,6 +49,7 @@ private slots:
     void readAudioBuffer(void);
     void finishedAudioBuffer(void);
     void countBeat(void);
+    void analysisCompleted(void);
 
 private: // methods
     void saveAppSettings(void);
