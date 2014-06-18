@@ -7,7 +7,7 @@
 #include <QtCore/QDebug>
 
 const QString Company = "c't";
-const QString AppName = "lolqt";
+const QString AppName = "lolQt";
 const QString AppUrl = "https://github.com/ola-ct/lolqt";
 const QString AppAuthor = "Oliver Lau";
 const QString AppAuthorMail = "ola@ct.de";
