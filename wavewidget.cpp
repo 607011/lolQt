@@ -69,7 +69,7 @@ void WaveWidget::drawWaveForm(void)
                 break;
         }
         const int EndStep = qMin(SampleStep + i, d->samples.size());
-        for (int j = i; j < EndStep; ++j)
+        for (int j = i; j < EndStep; ++j) // TODO: protect d->waveForm alterations with QMutex?
             p.drawPoint(QPointF(j * xs, halfHeight + ys * d->samples.at(j)));
     }
     d->samples.clear();
