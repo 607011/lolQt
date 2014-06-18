@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QPointF>
 #include <QImage>
+#include <QMutex>
 #include <QtConcurrent>
 #include <QtCore/QDebug>
 
@@ -30,6 +31,7 @@ public:
     bool cancelDraw;
     qint64 duration;
     qint64 position;
+    QMutex drawMutex;
 };
 
 
@@ -58,10 +60,17 @@ void WaveWidget::drawWaveForm(void)
     const qreal halfHeight = 0.5 * d->waveForm.height();
     const qreal xs = qreal(d->waveForm.width()) / qreal(d->samples.size());
     const qreal ys = qreal(halfHeight) / (2 << (8 * sizeof(SampleBufferType) - 2));
-    for (int x = 0; x < d->samples.size(); ++x) {
+    static const int SampleStep = 65536;
+    for (int i = 0; i < d->samples.size(); i += SampleStep) {
+        d->drawMutex.lock();
         if (d->cancelDraw)
             break;
-        p.drawPoint(QPointF(x * xs, halfHeight + ys * d->samples.at(x)));
+        d->drawMutex.unlock();
+        int nRemainingSamples = qMin(SampleStep, d->samples.size() - i);
+        for (int j = 0; j < nRemainingSamples; ++j) {
+            int x = i + j;
+            p.drawPoint(QPointF(x * xs, halfHeight + ys * d->samples.at(x)));
+        }
     }
     d->samples.clear();
     update();
@@ -73,7 +82,9 @@ void WaveWidget::drawWaveForm(void)
 void WaveWidget::setSamples(const SampleBuffer &samples, qint64 duration)
 {
     Q_D(WaveWidget);
+    d->drawMutex.lock();
     d->cancelDraw = false;
+    d->drawMutex.unlock();
     d->duration = duration;
     d->samples = samples;
     d->timerId = startTimer(40);
@@ -90,7 +101,9 @@ bool WaveWidget::isActive(void) const
 void WaveWidget::cancel(void)
 {
     Q_D(WaveWidget);
+    d->drawMutex.lock();
     d->cancelDraw = true;
+    d->drawMutex.unlock();
     killTimer(d->timerId);
     d->timerId = 0;
     d->drawFuture.waitForFinished();
