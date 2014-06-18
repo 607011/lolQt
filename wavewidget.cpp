@@ -53,8 +53,6 @@ WaveWidget::~WaveWidget()
 void WaveWidget::drawWaveForm(void)
 {
     Q_D(WaveWidget);
-    QElapsedTimer t;
-    t.start();
     d->drawMutex.lock();
     QPainter p(&d->waveForm);
     const qreal halfHeight = 0.5 * d->waveForm.height();
@@ -79,7 +77,6 @@ void WaveWidget::drawWaveForm(void)
     d->samples.clear();
     update();
     emit analysisCompleted();
-    qDebug() << t.elapsed();
 }
 
 
