@@ -8,6 +8,8 @@
 #include <QFuture>
 #include <QElapsedTimer>
 #include <QPainterPath>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QtCore/QDebug>
 #include "types.h"
 #include "fft.h"
@@ -35,6 +37,7 @@ public:
     int percentReady;
     qint64 duration;
     qint64 position;
+    QMutex spectrumMutex;
 };
 
 
@@ -69,11 +72,15 @@ void EnergyWidget::analyzeSamples(void)
             break;
 
         d->fft.perform(src, spectrum);
+        src += BinSize;
+
+        d->spectrumMutex.lock();
         for (int i = 0; i < NBins; ++i) {
             d->spectrum[i] = spectrum[i].r;
             d->spectrum2[i] = spectrum[i].i;
         }
-        src += BinSize;
+        d->spectrumMutex.unlock();
+
 
         qreal maxEnergy = 0;
         for (int i = 0; i < NBins; ++i) {
@@ -148,13 +155,17 @@ void EnergyWidget::paintEvent(QPaintEvent*)
     p.setPen(Qt::NoPen);
     p.setBrush(QColor(0xee, 0xcc, 0x33, 0xc0));
     QPainterPath path1;
+    d->spectrumMutex.lock();
     for (int i = 0; i < NBins / xd; ++i)
         path1.addRect(xd * (i - 1) * xs, height(), xd * xs, -qAbs(d->spectrum[i] * ys));
+    d->spectrumMutex.unlock();
     p.drawPath(path1);
     p.setBrush(QColor(0xcc, 0x33, 0xee, 0xc0));
     QPainterPath path2;
+    d->spectrumMutex.lock();
     for (int i = 0; i < NBins / xd; ++i)
         path2.addRect(xd * (i - 1) * xs, 0, xd * xs, qAbs(d->spectrum2[i] * ys));
+    d->spectrumMutex.unlock();
     p.drawPath(path2);
     if (d->analyzeFuture.isRunning()) {
         static const int padding = 2;
