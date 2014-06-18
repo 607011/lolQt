@@ -21,4 +21,14 @@ Download [lolQt-1.0.1-setup.exe](https://drive.google.com/folderview?id=0B3S-OBO
   * Drop an animated GIF onto the GUI.
   * Drop a music file (MP3) onto the GUI.
   * Tap on "Beat me!" according to the rhythm to compute beats per minute or choose bpm in the spin box.
-  * Click "Save frames" to write the output file to disk. An AVI will be written with the sequence of the GIF's frames repeated as long as the music lasts. The sequence will be in synch with the music.
+  * Click "Save frames" to write the output file to disk. An AVI will be written with the sequence of the GIF's frames repeated as long as the music lasts. The sequence will be in sync with the music.
+
+## Quirks
+
+Changing bpm will change the display speed of the GIF's frame sequence. Unfortunately the GUI display will be in synch with the music _only by luck_, because the routines used to read the GIF ([```QMovie```](http://qt-project.org/doc/qt-5/QMovie.html)) do not properly respect the intervals between the frames. Nevertheless, the frame sequence and the music of the written video will be in sync dead sure.
+
+## Copyright
+
+Copyright (C) 2014 Oliver Lau, Heise Zeitschriften Verlag
+
+*lolQt* comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions.
