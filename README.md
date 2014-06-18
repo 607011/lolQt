@@ -31,4 +31,4 @@ Changing bpm will change the display speed of the GIF's frame sequence. Unfortun
 
 Copyright (C) 2014 Oliver Lau, Heise Zeitschriften Verlag
 
-*lolQt* comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See LICENSE for details.
+**lolQt** comes with ABSOLUTELY NO WARRANTY. It's free software, and you are welcome to redistribute it under certain conditions. See LICENSE for details.
