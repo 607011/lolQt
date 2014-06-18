@@ -5,7 +5,7 @@
 ## Prerequisites
 
   * [Microsoft Visual C++ 2010 SP1 Redistributable Package (x86)](http://www.microsoft.com/de-de/download/details.aspx?id=8328)
-  * [MEncoder](http://oss.netfarm.it/mplayer-win32.php): Choose the correct build for your architecture.
+  * [MEncoder](http://oss.netfarm.it/mplayer-win32.php): For optimal performance choose the correct build for your architecture.
 
 ## Installation
 
