@@ -93,7 +93,7 @@ MainWindow::MainWindow(QWidget *parent)
     Q_D(MainWindow);
     ui->setupUi(this);
 
-    setWindowTitle(QString("%1 %2").arg(AppName).arg(AppVersion));
+    setWindowTitle(AppName);
 
     QSettings::setDefaultFormat(QSettings::NativeFormat);
 
