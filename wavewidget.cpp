@@ -17,6 +17,7 @@ public:
     WaveWidgetPrivate(void)
         : waveForm(16 * 1024, 128, QImage::Format_RGB32)
         , defaultWaveform(":/images/waveform.png")
+        , displayedWaveForm(&defaultWaveform)
         , timerId(0)
         , backgroundColor(0x30, 0x30, 0x30)
         , cancelDraw(false)
@@ -27,6 +28,7 @@ public:
     }
     SampleBuffer samples;
     QImage waveForm;
+    const QImage *displayedWaveForm;
     const QImage defaultWaveform;
     int timerId;
     const QColor backgroundColor;
@@ -37,8 +39,7 @@ public:
     QMutex drawMutex;
 
     void resetWaveform(void) {
-        QPainter p(&waveForm);
-        p.drawImage(waveForm.rect(), defaultWaveform);
+        displayedWaveForm = &defaultWaveform;
     }
 };
 
@@ -61,6 +62,7 @@ void WaveWidget::drawWaveForm(void)
 {
     Q_D(WaveWidget);
     d->drawMutex.lock();
+    d->displayedWaveForm = &d->waveForm;
     QPainter p(&d->waveForm);
     const qreal halfHeight = 0.5 * d->waveForm.height();
     const qreal xs = qreal(d->waveForm.width()) / qreal(d->samples.size());
@@ -152,10 +154,10 @@ void WaveWidget::paintEvent(QPaintEvent*)
     QPainter p(this);
     p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     d->drawMutex.lock();
-    p.drawImage(rect(), d->waveForm);
+    p.drawImage(rect(), *d->displayedWaveForm);
     d->drawMutex.unlock();
-    if (d->drawFuture.isRunning())
-        p.fillRect(rect(), QColor(0x80, 0x80, 0x80, 0x80));
+//    if (d->drawFuture.isRunning())
+//        p.fillRect(rect(), QColor(0x80, 0x80, 0x80, 0x80));
     if (d->position > 0 && d->duration > 0) {
         p.setPen(QColor(0xff, 0x22, 0x33));
         int x = width() * d->position / d->duration;
