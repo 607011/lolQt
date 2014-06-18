@@ -84,9 +84,7 @@ void WaveWidget::drawWaveForm(void)
 void WaveWidget::setSamples(const SampleBuffer &samples, qint64 duration)
 {
     Q_D(WaveWidget);
-    d->drawMutex.lock();
     d->cancelDraw = false;
-    d->drawMutex.unlock();
     d->duration = duration;
     d->samples = samples;
     d->timerId = startTimer(40);
