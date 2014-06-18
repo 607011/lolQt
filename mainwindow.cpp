@@ -433,6 +433,7 @@ void MainWindow::readAudioBuffer(void)
 void MainWindow::finishedAudioBuffer(void)
 {
     Q_D(MainWindow);
+    d->samples.squeeze();
     ui->statusBar->showMessage(tr("Analyzing audio ..."));
     d->waveWidget->setSamples(d->samples, d->audio->duration());
     d->energyWidget->setSamples(d->samples);
