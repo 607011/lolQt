@@ -16,6 +16,7 @@ public:
         : waveForm(16 * 1024, 128, QImage::Format_RGB32)
         , timerId(0)
         , backgroundColor(0x30, 0x30, 0x30)
+        , cancelDraw(false)
         , duration(0)
         , position(0)
     {
@@ -26,6 +27,7 @@ public:
     int timerId;
     const QColor backgroundColor;
     QFuture<void> drawFuture;
+    bool cancelDraw;
     qint64 duration;
     qint64 position;
 };
@@ -48,8 +50,6 @@ WaveWidget::~WaveWidget()
 void WaveWidget::drawWaveForm(void)
 {
     Q_D(WaveWidget);
-    QElapsedTimer t;
-    t.start();
     QPainter p(&d->waveForm);
     p.fillRect(d->waveForm.rect(), d->backgroundColor);
     p.setRenderHint(QPainter::Antialiasing);
@@ -59,9 +59,9 @@ void WaveWidget::drawWaveForm(void)
     const qreal xs = qreal(d->waveForm.width()) / qreal(d->samples.size());
     const qreal ys = qreal(halfHeight) / (2 << (8 * sizeof(SampleBufferType) - 2));
     for (int x = 0; x < d->samples.size(); ++x) {
-        p.drawPoint(QPointF(x * xs, halfHeight + ys * d->samples.at(x)));
-        if (d->timerId == 0)
+        if (d->cancelDraw)
             break;
+        p.drawPoint(QPointF(x * xs, halfHeight + ys * d->samples.at(x)));
     }
     d->samples.clear();
     update();
@@ -73,6 +73,7 @@ void WaveWidget::drawWaveForm(void)
 void WaveWidget::setSamples(const SampleBuffer &samples, qint64 duration)
 {
     Q_D(WaveWidget);
+    d->cancelDraw = false;
     d->duration = duration;
     d->samples = samples;
     d->timerId = startTimer(40);
@@ -89,6 +90,7 @@ bool WaveWidget::isActive(void) const
 void WaveWidget::cancel(void)
 {
     Q_D(WaveWidget);
+    d->cancelDraw = true;
     killTimer(d->timerId);
     d->timerId = 0;
     d->drawFuture.waitForFinished();
