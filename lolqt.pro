@@ -39,7 +39,8 @@ FORMS    += mainwindow.ui \
 
 OTHER_FILES += \
     .gitignore \
-    README.md
+    README.md \
+    LICENSE
 
 RESOURCES += \
     lolqt.qrc
