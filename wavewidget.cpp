@@ -53,28 +53,33 @@ WaveWidget::~WaveWidget()
 void WaveWidget::drawWaveForm(void)
 {
     Q_D(WaveWidget);
+    QElapsedTimer t;
+    t.start();
+    d->drawMutex.lock();
     QPainter p(&d->waveForm);
-    p.fillRect(d->waveForm.rect(), d->backgroundColor);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setBrush(Qt::transparent);
-    p.setPen(QPen(QBrush(QColor(0x33, 0xcc, 0x44)), 0.1));
     const qreal halfHeight = 0.5 * d->waveForm.height();
     const qreal xs = qreal(d->waveForm.width()) / qreal(d->samples.size());
     const qreal ys = qreal(halfHeight) / (2 << (8 * sizeof(SampleBufferType) - 2));
-    static const int SampleStep = 65536;
+    p.fillRect(d->waveForm.rect(), d->backgroundColor);
+    d->drawMutex.unlock();
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setBrush(Qt::transparent);
+    p.setPen(QPen(QBrush(QColor(0x33, 0xcc, 0x44)), 0.1));
+    static const int SampleStep = 4096;
     for (int i = 0; i < d->samples.size(); i += SampleStep) {
-        {
+        if (d->cancelDraw)
+            break;
+        else {
             QMutexLocker(&d->drawMutex);
-            if (d->cancelDraw)
-                break;
+            const int EndStep = qMin(SampleStep + i, d->samples.size());
+            for (int j = i; j < EndStep; ++j)
+                p.drawPoint(QPointF(j * xs, halfHeight + ys * d->samples.at(j)));
         }
-        const int EndStep = qMin(SampleStep + i, d->samples.size());
-        for (int j = i; j < EndStep; ++j) // TODO: protect d->waveForm alterations with QMutex?
-            p.drawPoint(QPointF(j * xs, halfHeight + ys * d->samples.at(j)));
     }
     d->samples.clear();
     update();
     emit analysisCompleted();
+    qDebug() << t.elapsed();
 }
 
 
@@ -101,9 +106,7 @@ bool WaveWidget::isActive(void) const
 void WaveWidget::cancel(void)
 {
     Q_D(WaveWidget);
-    d->drawMutex.lock();
     d->cancelDraw = true;
-    d->drawMutex.unlock();
     killTimer(d->timerId);
     d->timerId = 0;
     d->drawFuture.waitForFinished();
@@ -146,7 +149,9 @@ void WaveWidget::paintEvent(QPaintEvent*)
     Q_D(WaveWidget);
     QPainter p(this);
     p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    d->drawMutex.lock();
     p.drawImage(rect(), d->waveForm);
+    d->drawMutex.unlock();
     if (d->drawFuture.isRunning())
         p.fillRect(rect(), QColor(0x80, 0x80, 0x80, 0x80));
     if (d->position > 0 && d->duration > 0) {
