@@ -10,6 +10,8 @@ TEMPLATE = app
 
 TRANSLATIONS = lolqt-de_DE.ts
 
+RC_FILE = lolqt.rc
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     imagewidget.cpp \

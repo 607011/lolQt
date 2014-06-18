@@ -2,4 +2,7 @@
     <qresource prefix="/translations">
         <file>lolqt-de_DE.qm</file>
     </qresource>
+    <qresource prefix="/images">
+        <file>waveform.png</file>
+    </qresource>
 </RCC>
