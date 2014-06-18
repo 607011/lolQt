@@ -183,9 +183,9 @@ void MainWindow::openImage(void)
     Q_D(MainWindow);
     const QString &fileName =
             QFileDialog::getOpenFileName(this,
-                                         tr("Open animated GIF/PNG"),
+                                         tr("Open animated GIF"),
                                          d->settingsForm->getOpenDirectory(),
-                                         tr("Images (*.gif *.png)"));
+                                         tr("Animated GIF images (*.gif)"));
     if (fileName.isEmpty())
         return;
     QFileInfo fi(fileName);
@@ -291,7 +291,8 @@ void MainWindow::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
 void MainWindow::audioBufferReady(const QAudioBuffer &buf)
 {
-    qDebug() << buf.startTime() << buf.duration() << buf.sampleCount();
+    Q_UNUSED(buf);
+    // qDebug() << buf.startTime() << buf.duration() << buf.sampleCount();
 }
 
 
@@ -425,7 +426,7 @@ void MainWindow::readAudioBuffer(void)
         for (int i = 0; i < buf.sampleCount(); ++i)
             d->samples.append(buf.constData<SampleBufferType>()[i]);
         ui->statusBar->showMessage(tr("Decoding audio ... %1%")
-                                   .arg(100 * buf.startTime() / d->audioDecoder->duration()));
+                                   .arg(100LL * buf.startTime() / d->audioDecoder->duration()));
     }
 }
 

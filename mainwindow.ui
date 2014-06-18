@@ -29,8 +29,11 @@
         <height>240</height>
        </size>
       </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
       <property name="title">
-       <string>Drop GIF/PNG and audio file here</string>
+       <string>Drop GIF and audio here</string>
       </property>
      </widget>
     </item>
@@ -199,7 +202,7 @@
    </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
-     <string>&amp;File</string>
+     <string>File</string>
     </property>
     <addaction name="actionOpenImage"/>
     <addaction name="actionOpenAudio"/>
@@ -244,42 +247,17 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpenImage">
    <property name="text">
-    <string>&amp;Open image ...</string>
+    <string>Open image ...</string>
    </property>
   </action>
   <action name="actionSaveFrames">
    <property name="text">
-    <string>&amp;Save frames</string>
-   </property>
-  </action>
-  <action name="action100">
-   <property name="text">
-    <string>100%</string>
-   </property>
-  </action>
-  <action name="action75">
-   <property name="text">
-    <string>75%</string>
-   </property>
-  </action>
-  <action name="action50">
-   <property name="text">
-    <string>50%</string>
-   </property>
-  </action>
-  <action name="action25">
-   <property name="text">
-    <string>25%</string>
-   </property>
-  </action>
-  <action name="action0">
-   <property name="text">
-    <string>0%</string>
+    <string>Save frames</string>
    </property>
   </action>
   <action name="actionQuit">
    <property name="text">
-    <string>&amp;Quit</string>
+    <string>Quit</string>
    </property>
   </action>
   <action name="actionSettings">
