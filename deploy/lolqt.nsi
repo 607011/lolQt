@@ -23,7 +23,7 @@ Page instfiles
 ;  File D:\Developer\Qt-5.3\vcredist\vcredist_sp1_x86.exe
 ;SectionEnd
 
-Section "lolqt"
+Section "lolQt"
 
 ;  ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\11.0\VC\VCRedist\x86" "Installed"
 ;  StrCmp $1 1 vcredist_installed
