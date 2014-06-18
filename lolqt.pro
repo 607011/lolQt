@@ -46,7 +46,8 @@ OTHER_FILES += \
     README.md \
     LICENSE \
     deploy/lolqt.nsi \
-    lolqt.rc
+    lolqt.rc \
+    LIESMICH.md
 
 RESOURCES += \
     lolqt.qrc
