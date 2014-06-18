@@ -6,6 +6,7 @@
 #include <QPointF>
 #include <QImage>
 #include <QMutex>
+#include <QMutexLocker>
 #include <QtConcurrent>
 #include <QtCore/QDebug>
 
@@ -62,14 +63,14 @@ void WaveWidget::drawWaveForm(void)
     const qreal ys = qreal(halfHeight) / (2 << (8 * sizeof(SampleBufferType) - 2));
     static const int SampleStep = 65536;
     for (int i = 0; i < d->samples.size(); i += SampleStep) {
-        d->drawMutex.lock();
-        if (d->cancelDraw)
-            break;
-        d->drawMutex.unlock();
-        const int EndStep = qMin(SampleStep + i, d->samples.size());
-        for (int j = i; j < EndStep; ++j) {
-            p.drawPoint(QPointF(j * xs, halfHeight + ys * d->samples.at(j)));
+        {
+            QMutexLocker(&d->drawMutex);
+            if (d->cancelDraw)
+                break;
         }
+        const int EndStep = qMin(SampleStep + i, d->samples.size());
+        for (int j = i; j < EndStep; ++j)
+            p.drawPoint(QPointF(j * xs, halfHeight + ys * d->samples.at(j)));
     }
     d->samples.clear();
     update();
