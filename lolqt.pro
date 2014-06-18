@@ -5,10 +5,10 @@ QT       += core gui multimedia concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = lolqt
+TARGET = lolQt
 TEMPLATE = app
 
-TRANSLATIONS = lolqt-de_DE.ts
+TRANSLATIONS = lolQt-de_DE.ts
 
 RC_FILE = lolqt.rc
 

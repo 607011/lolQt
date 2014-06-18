@@ -1,5 +1,5 @@
 !define VERSION "1.0.1"
-!define APP "lolqt"
+!define APP "lolQt"
 !define PUBLISHER "c't"
 
 Name "${APP} ${VERSION}"
@@ -37,8 +37,8 @@ Section "lolqt"
   CreateDirectory $INSTDIR\platforms
   CreateDirectory $INSTDIR\mediaservice
   CreateDirectory $INSTDIR\sampledata
-  File v${VERSION}\lolqt.exe
-  File v${VERSION}\lolqt.exe.embed.manifest
+  File v${VERSION}\lolQt.exe
+  File v${VERSION}\lolQt.exe.embed.manifest
   File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\icudt52.dll
   File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\icuin52.dll
   File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\icuuc52.dll
@@ -71,10 +71,10 @@ Section "Uninstall"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP}"
   DeleteRegKey HKLM SOFTWARE\${APP}
 
-  Delete $INSTDIR\lolqt.exe
+  Delete $INSTDIR\lolQt.exe
+  Delete $INSTDIR\lolQt.exe.embed.manifest
   Delete $INSTDIR\LICENSE
   Delete $INSTDIR\uninstall.exe
-  Delete $INSTDIR\lolqt.exe.embed.manifest
   Delete $INSTDIR\icudt52.dll
   Delete $INSTDIR\icuin52.dll
   Delete $INSTDIR\icuuc52.dll
