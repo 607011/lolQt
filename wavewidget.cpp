@@ -16,16 +16,18 @@ class WaveWidgetPrivate {
 public:
     WaveWidgetPrivate(void)
         : waveForm(16 * 1024, 128, QImage::Format_RGB32)
+        , defaultWaveform(":/images/waveform.png")
         , timerId(0)
         , backgroundColor(0x30, 0x30, 0x30)
         , cancelDraw(false)
         , duration(0)
         , position(0)
     {
-        waveForm.fill(backgroundColor);
+        resetWaveform();
     }
     SampleBuffer samples;
     QImage waveForm;
+    const QImage defaultWaveform;
     int timerId;
     const QColor backgroundColor;
     QFuture<void> drawFuture;
@@ -33,6 +35,11 @@ public:
     qint64 duration;
     qint64 position;
     QMutex drawMutex;
+
+    void resetWaveform(void) {
+        QPainter p(&waveForm);
+        p.drawImage(waveForm.rect(), defaultWaveform);
+    }
 };
 
 
@@ -105,7 +112,7 @@ void WaveWidget::cancel(void)
     killTimer(d->timerId);
     d->timerId = 0;
     d->drawFuture.waitForFinished();
-    d->waveForm.fill(d->backgroundColor);
+    d->resetWaveform();
     update();
 }
 
