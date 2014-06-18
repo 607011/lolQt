@@ -102,7 +102,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->originalGroupBox->setLayout(hbox1);
 
     ui->horizontalLayout2->addWidget(d->waveWidget);
+#ifndef QT_NO_DEBUG
     ui->horizontalLayout2->addWidget(d->energyWidget);
+#endif
 
     QObject::connect(ui->actionOpenImage, SIGNAL(triggered()), SLOT(openImage()));
     QObject::connect(ui->actionOpenAudio, SIGNAL(triggered()), SLOT(openAudio()));
