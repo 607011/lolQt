@@ -3,6 +3,8 @@
 
 QT       += core gui multimedia concurrent
 
+VERSION = 1.0.1
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = lolQt
@@ -10,7 +12,9 @@ TEMPLATE = app
 
 TRANSLATIONS = lolQt-de_DE.ts
 
+win32 {
 RC_FILE = lolqt.rc
+}
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -40,7 +44,9 @@ FORMS    += mainwindow.ui \
 OTHER_FILES += \
     .gitignore \
     README.md \
-    LICENSE
+    LICENSE \
+    deploy/lolqt.nsi \
+    lolqt.rc
 
 RESOURCES += \
     lolqt.qrc
