@@ -29,7 +29,7 @@ ImageWidget::ImageWidget(QLabel* parent)
 void ImageWidget::dragEnterEvent(QDragEnterEvent* e)
 {
     const QMimeData* const d = e->mimeData();
-    if (d->hasUrls() && d->urls().first().toString().contains(QRegExp("\\.(png|gif|mp3)$")))
+    if (d->hasUrls() && d->urls().first().toString().contains(QRegExp("\\.(png|gif|mp3|m4a)$")))
         e->acceptProposedAction();
     else
         e->ignore();
@@ -55,7 +55,7 @@ void ImageWidget::dropEvent(QDropEvent* e)
         if (fileUrl.endsWith((".gif")) || fileUrl.endsWith((".png"))) {
             loadImage(fileUrl);
         }
-        else if (fileUrl.endsWith((".mp3"))) {
+        else if (fileUrl.endsWith((".mp3")) || fileUrl.endsWith(".m4a")) {
             loadMusic(fileUrl);
         }
     }
