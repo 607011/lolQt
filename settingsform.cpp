@@ -17,8 +17,9 @@ SettingsForm::SettingsForm(QDialog *parent)
     setModal(true);
     setWindowTitle(QString("%1 - Settings").arg(AppName));
 
-    ui->outputFileLineEdit->setText(QDir::currentPath() + "/output.avi");
-    ui->openDirectoryLineEdit->setText(QDir::currentPath());
+    ui->mencoderPathLineEdit->setText(QDir::currentPath() + "/mencoder.exe");
+    ui->outputFileLineEdit->setText(QDir::homePath() + "/output.avi");
+    ui->openDirectoryLineEdit->setText(QDir::homePath());
     ui->tmpDirectoryLineEdit->setText(QDir::tempPath());
 
     QObject::connect(ui->chooseOpenDirectoryPushButton, SIGNAL(clicked()), SLOT(chooseOpenDirectory()));
