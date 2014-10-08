@@ -1,4 +1,4 @@
-!define VERSION "1.0.1"
+!define VERSION "1.0.2"
 !define APP "lolQt"
 !define PUBLISHER "c't"
 
@@ -49,6 +49,7 @@ Section "lolQt"
   File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\Qt5Network.dll
   File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\Qt5Widgets.dll
   File ..\LICENSE
+  File mencoder.exe
   File /oname=sampledata\cat.gif sampledata\thirsty-cat.gif
   File /oname=plugins\imageformats\qgif.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\imageformats\qgif.dll
   File /oname=platforms\qminimal.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\platforms\qminimal.dll
@@ -74,6 +75,7 @@ Section "Uninstall"
   Delete $INSTDIR\lolQt.exe
   Delete $INSTDIR\lolQt.exe.embed.manifest
   Delete $INSTDIR\LICENSE
+  Delete $INSTDIR\mencoder.exe
   Delete $INSTDIR\uninstall.exe
   Delete $INSTDIR\icudt52.dll
   Delete $INSTDIR\icuin52.dll
