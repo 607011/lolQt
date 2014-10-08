@@ -283,22 +283,22 @@
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="settingsform.cpp" line="102"/>
+        <location filename="settingsform.cpp" line="103"/>
         <source>Select output file</source>
         <translation>Ausgabedatei wählen</translation>
     </message>
     <message>
-        <location filename="settingsform.cpp" line="115"/>
+        <location filename="settingsform.cpp" line="116"/>
         <source>Select open directory</source>
         <translation>Verzeichnis für Quelldateien wählen</translation>
     </message>
     <message>
-        <location filename="settingsform.cpp" line="127"/>
+        <location filename="settingsform.cpp" line="128"/>
         <source>Select directory for temporary files</source>
         <translation>Verzeichnis für temporäre Dateien wählen</translation>
     </message>
     <message>
-        <location filename="settingsform.cpp" line="138"/>
+        <location filename="settingsform.cpp" line="139"/>
         <source>Select mencoder binary</source>
         <translation>MEncoder-Programmdatei wählen</translation>
     </message>
