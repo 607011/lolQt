@@ -243,7 +243,7 @@ void MainWindow::saveVideo(void)
     }
     frameFileList.close();
     const QImage &frame = d->movie->currentImage();
-    QString cmdLine = d->settingsForm->getMencoderPath() +
+    QString cmdLine = QString("\"%1\"").arg(d->settingsForm->getMencoderPath()) +
             QString(" mf://@%1").arg(frameFileList.fileName()) +
             QString(" -mf w=%1:h=%2:fps=%3:type=png").arg(frame.width()).arg(frame.height()).arg(d->fps) +
             QString(" -ovc lavc") +
