@@ -145,84 +145,89 @@
         <translation>Konsole</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="157"/>
+        <location filename="mainwindow.cpp" line="160"/>
         <source>Really exit?</source>
         <translation>Wirklich beenden?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="158"/>
+        <location filename="mainwindow.cpp" line="161"/>
         <source>The encoder is running in the background. If you quit, the process will be cancelled and the results be lost. Do you really want to quit?</source>
         <translation>Im Hintergrund läuft die Videokodierung. Wenn Sie die Anwendung beenden, stoppt die Verarbeitung und die Ergebnisse sind gegebenenfalls verloren. Wollen Sie wirklich beenden?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="186"/>
+        <location filename="mainwindow.cpp" line="190"/>
         <source>Open animated GIF</source>
         <oldsource>Open animated GIF/PNG</oldsource>
         <translation>Animiertes GIF öffnen</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="188"/>
+        <location filename="mainwindow.cpp" line="192"/>
         <source>Animated GIF images (*.gif)</source>
         <oldsource>Images (*.gif *.png)</oldsource>
         <translation>Animierte GIFs (*.gif)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="202"/>
+        <location filename="mainwindow.cpp" line="206"/>
         <source>Open audio file</source>
         <translation>Audio-Datei öffnen</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="204"/>
+        <location filename="mainwindow.cpp" line="208"/>
         <source>Audio files (*.mp3)</source>
         <translation>Audio-Dateien (*.mp3)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="229"/>
+        <location filename="mainwindow.cpp" line="233"/>
         <source>Overwrite file?</source>
         <translation>Datei überschreiben?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="230"/>
+        <location filename="mainwindow.cpp" line="234"/>
         <source>The selected output file already exists. Do you want to overwrite the file?</source>
         <translation>Die gewählte Ausgabedatei existiert bereits. Wollen Sie sie überschreiben?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="285"/>
+        <location filename="mainwindow.cpp" line="256"/>
+        <source>Music: %1 - %2</source>
+        <translation>Musik: %1 - %2</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="353"/>
         <source>Written video to &quot;%1&quot;.</source>
         <translation>Video in Datei &apos;%1&apos; geschrieben.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="287"/>
+        <location filename="mainwindow.cpp" line="355"/>
         <source>Warning! MEncoder exited unexpectedly. Video may not have been written.</source>
         <translation>Achtung! MEncoder wurde unerwartet beendet. Das Video wurde möglicherweise nicht geschrieben.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="373"/>
+        <location filename="mainwindow.cpp" line="450"/>
         <source>%1 frames, %2 fps, %3 ms</source>
         <translation>%1 Einzelbilder, %2 fps, %3 ms</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="428"/>
+        <location filename="mainwindow.cpp" line="505"/>
         <source>Decoding audio ... %1%</source>
         <translation>Audio wird dekodiert ... %1%</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="438"/>
+        <location filename="mainwindow.cpp" line="515"/>
         <source>Analyzing audio ...</source>
         <translation>Audio wird analysiert ...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="446"/>
+        <location filename="mainwindow.cpp" line="523"/>
         <source>Analysis complete.</source>
         <translation>Analyse beendet.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="515"/>
+        <location filename="mainwindow.cpp" line="596"/>
         <source>About %1 %2%3</source>
         <translation>Über %1 %2%3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="516"/>
+        <location filename="mainwindow.cpp" line="597"/>
         <source>&lt;p&gt;&lt;b&gt;%1&lt;/b&gt; merges animated GIFs and music into videos. See &lt;a href=&quot;%2&quot; title=&quot;%1 project homepage&quot;&gt;%2&lt;/a&gt; for more info.&lt;/p&gt;&lt;p&gt;Copyright &amp;copy; 2014 %3 &amp;lt;%4&amp;gt;, Heise Zeitschriften Verlag.&lt;/p&gt;&lt;p&gt;This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/p&gt;You should have received a copy of the GNU General Public License along with this program. If not, see &lt;a href=&quot;http://www.gnu.org/licenses/gpl-3.0&quot;&gt;http://www.gnu.org/licenses&lt;/a&gt;.&lt;/p&gt;</source>
         <translation></translation>
     </message>
@@ -240,15 +245,11 @@
         <translation>MEncoder</translation>
     </message>
     <message>
-        <location filename="settingsform.ui" line="47"/>
-        <source>D:/Developer/mencoder/mencoder.exe</source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="settingsform.ui" line="54"/>
         <location filename="settingsform.ui" line="75"/>
         <location filename="settingsform.ui" line="96"/>
         <location filename="settingsform.ui" line="117"/>
+        <location filename="settingsform.ui" line="191"/>
         <source>Choose ...</source>
         <translation>Wählen ...</translation>
     </message>
@@ -278,27 +279,37 @@
         <translation> kbps</translation>
     </message>
     <message>
-        <location filename="settingsform.ui" line="173"/>
+        <location filename="settingsform.ui" line="169"/>
+        <source>LAVC options</source>
+        <translation>LAVC-Optionen</translation>
+    </message>
+    <message>
+        <location filename="settingsform.ui" line="179"/>
+        <source>Subtitle font</source>
+        <translation>Untertitel-Font</translation>
+    </message>
+    <message>
+        <location filename="settingsform.ui" line="204"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="settingsform.cpp" line="103"/>
+        <location filename="settingsform.cpp" line="128"/>
         <source>Select output file</source>
         <translation>Ausgabedatei wählen</translation>
     </message>
     <message>
-        <location filename="settingsform.cpp" line="116"/>
+        <location filename="settingsform.cpp" line="141"/>
         <source>Select open directory</source>
         <translation>Verzeichnis für Quelldateien wählen</translation>
     </message>
     <message>
-        <location filename="settingsform.cpp" line="128"/>
+        <location filename="settingsform.cpp" line="153"/>
         <source>Select directory for temporary files</source>
         <translation>Verzeichnis für temporäre Dateien wählen</translation>
     </message>
     <message>
-        <location filename="settingsform.cpp" line="139"/>
+        <location filename="settingsform.cpp" line="164"/>
         <source>Select mencoder binary</source>
         <translation>MEncoder-Programmdatei wählen</translation>
     </message>
