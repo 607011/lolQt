@@ -187,47 +187,47 @@
         <translation>Die gewählte Ausgabedatei existiert bereits. Wollen Sie sie überschreiben?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="256"/>
+        <location filename="mainwindow.cpp" line="254"/>
         <source>Music: %1 - %2</source>
         <translation>Musik: %1 - %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="353"/>
+        <location filename="mainwindow.cpp" line="352"/>
         <source>Written video to &quot;%1&quot;.</source>
         <translation>Video in Datei &apos;%1&apos; geschrieben.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="355"/>
+        <location filename="mainwindow.cpp" line="354"/>
         <source>Warning! MEncoder exited unexpectedly. Video may not have been written.</source>
         <translation>Achtung! MEncoder wurde unerwartet beendet. Das Video wurde möglicherweise nicht geschrieben.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="450"/>
+        <location filename="mainwindow.cpp" line="449"/>
         <source>%1 frames, %2 fps, %3 ms</source>
         <translation>%1 Einzelbilder, %2 fps, %3 ms</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="505"/>
+        <location filename="mainwindow.cpp" line="504"/>
         <source>Decoding audio ... %1%</source>
         <translation>Audio wird dekodiert ... %1%</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="515"/>
+        <location filename="mainwindow.cpp" line="514"/>
         <source>Analyzing audio ...</source>
         <translation>Audio wird analysiert ...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="523"/>
+        <location filename="mainwindow.cpp" line="522"/>
         <source>Analysis complete.</source>
         <translation>Analyse beendet.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="596"/>
+        <location filename="mainwindow.cpp" line="595"/>
         <source>About %1 %2%3</source>
         <translation>Über %1 %2%3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="597"/>
+        <location filename="mainwindow.cpp" line="596"/>
         <source>&lt;p&gt;&lt;b&gt;%1&lt;/b&gt; merges animated GIFs and music into videos. See &lt;a href=&quot;%2&quot; title=&quot;%1 project homepage&quot;&gt;%2&lt;/a&gt; for more info.&lt;/p&gt;&lt;p&gt;Copyright &amp;copy; 2014 %3 &amp;lt;%4&amp;gt;, Heise Zeitschriften Verlag.&lt;/p&gt;&lt;p&gt;This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/p&gt;You should have received a copy of the GNU General Public License along with this program. If not, see &lt;a href=&quot;http://www.gnu.org/licenses/gpl-3.0&quot;&gt;http://www.gnu.org/licenses&lt;/a&gt;.&lt;/p&gt;</source>
         <translation></translation>
     </message>
