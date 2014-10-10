@@ -1,4 +1,4 @@
-!define VERSION "1.0.2"
+!define VERSION "1.0.3"
 !define APP "lolQt"
 !define PUBLISHER "c't"
 
