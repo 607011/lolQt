@@ -8,6 +8,7 @@
 #include <QProcess>
 #include <QScopedPointer>
 #include <QAudioBuffer>
+#include <QAudioDecoder>
 #include "imagewidget.h"
 #include "main.h"
 
@@ -43,6 +44,7 @@ private slots:
     void processErrorOutput(void);
     void processFinished(int, QProcess::ExitStatus);
     void audioBufferReady(const QAudioBuffer&);
+    void metaDataAvailableChanged(bool);
     void setVolume(void);
     void showConsole(bool);
     void consoleClosed(void);
@@ -58,6 +60,9 @@ private: // methods
     void disableSave(void);
     void calculateFPS(void);
     void cancelAudioAnalysis();
+    QString getSubtitleFilename(void) const;
+    QString getFrameFileListFilename(void) const;
+    void removeTemporaryFiles(void);
 
 private: // variables
     Ui::MainWindow *ui;

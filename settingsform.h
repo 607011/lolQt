@@ -26,6 +26,10 @@ public:
     void setTempDirectory(const QString&);
     QString getMencoderPath(void) const;
     void setMencoderPath(const QString&);
+    QString getLavcOptions(void) const;
+    void setLavcOptions(const QString&);
+    QString getSubtitleFont(void) const;
+    void setSubtitleFont(const QString&);
     int getAudioBitrate(void) const;
     void setAudioBitrate(int);
 

@@ -64,6 +64,8 @@ public:
     QAudioProbe *probe;
     SampleBuffer samples;
     QString audioFilename;
+    QString artist;
+    QString title;
     QStringList tmpImageFiles;
     qreal originalFPS;
     qreal fps;
@@ -126,6 +128,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(d->audio, SIGNAL(positionChanged(qint64)), d->waveWidget, SLOT(setPosition(qint64)));
     QObject::connect(d->audio, SIGNAL(durationChanged(qint64)), d->energyWidget, SLOT(setDuration(qint64)));
     QObject::connect(d->audio, SIGNAL(positionChanged(qint64)), d->energyWidget, SLOT(setPosition(qint64)));
+    QObject::connect(d->audio, SIGNAL(metaDataAvailableChanged(bool)), SLOT(metaDataAvailableChanged(bool)));
     QObject::connect(d->probe, SIGNAL(audioBufferProbed(QAudioBuffer)), SLOT(audioBufferReady(QAudioBuffer)));
     QObject::connect(ui->bpmSpinBox, SIGNAL(valueChanged(double)), SLOT(bpmChanged(double)));
     QObject::connect(d->process, SIGNAL(readyReadStandardOutput()), SLOT(processOutput()));
@@ -164,6 +167,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
     }
     saveAppSettings();
     cancelAudioAnalysis();
+    removeTemporaryFiles();
     d->settingsForm->close();
     d->consoleWidget->close();
     e->accept();
@@ -232,31 +236,94 @@ void MainWindow::saveVideo(void)
         if (button != QMessageBox::Yes)
             return;
     }
-    QFile frameFileList(d->settingsForm->getTempDirectory() + "/" + AppName + "-list.txt");
+    bool addMusicInfoAsSubtitle = false;
+    if (!d->artist.isEmpty() && !d->title.isEmpty() && d->audio->duration() > 11 * 1000) {
+        QFile subtitleFile(this->getSubtitleFilename());
+        const QTime &subStartTime = QTime::fromMSecsSinceStartOfDay(d->audio->duration() - 11 * 1000);
+        const QTime &subEndTime = QTime::fromMSecsSinceStartOfDay(d->audio->duration()- 1 * 1000);
+        if (subtitleFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            subtitleFile.write("1\n");
+            subtitleFile.write(QString("%1:%2:%3,000 --> %4:%5:%6,000\n")
+                               .arg(subStartTime.hour(), 2, 10, QChar('0'))
+                               .arg(subStartTime.minute(), 2, 10, QChar('0'))
+                               .arg(subStartTime.second(), 2, 10, QChar('0'))
+                               .arg(subEndTime.hour(), 2, 10, QChar('0'))
+                               .arg(subEndTime.minute(), 2, 10, QChar('0'))
+                               .arg(subEndTime.second(), 2, 10, QChar('0'))
+                               .toLocal8Bit());
+            subtitleFile.write(tr("Music: %1 - %2")
+                               .arg(d->artist)
+                               .arg(d->title).toLocal8Bit());
+            subtitleFile.close();
+        }
+        addMusicInfoAsSubtitle = true;
+    }
+    QFile frameFileList(this->getFrameFileListFilename());
     const int N = d->tmpImageFiles.count();
     Q_ASSERT(N > 0);
     if (frameFileList.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        for (int i = 0, j = 0; i < d->framesNeeded; ++i, ++j) {
-            frameFileList.write(d->tmpImageFiles[j % N].toLocal8Bit());
+        for (int i = 0; i < d->framesNeeded; ++i) {
+            frameFileList.write(d->tmpImageFiles[i % N].toLocal8Bit());
             frameFileList.write("\n");
         }
+        frameFileList.close();
     }
-    frameFileList.close();
     const QImage &frame = d->movie->currentImage();
-    QString cmdLine = QString("\"%1\"").arg(d->settingsForm->getMencoderPath()) +
-            QString(" mf://@%1").arg(frameFileList.fileName()) +
-            QString(" -mf w=%1:h=%2:fps=%3:type=png").arg(frame.width()).arg(frame.height()).arg(d->fps) +
+    QString cmdLine =
+            QString("\"%1\"")
+            .arg(d->settingsForm->getMencoderPath()) +
+            QString(" mf://@%1")
+            .arg(frameFileList.fileName()) +
+            QString(" -mf w=%1:h=%2:fps=%3:type=png")
+            .arg(frame.width())
+            .arg(frame.height())
+            .arg(d->fps) +
+            QString(" -of avi") +
             QString(" -ovc lavc") +
-            QString(" -lavcopts vcodec=mpeg4:mbd=2:trell:aspect=%1/%2").arg(frame.width()).arg(frame.height()) +
+            QString(" -lavcopts vcodec=%1:aspect=%2/%3")
+            .arg(d->settingsForm->getLavcOptions())
+            .arg(frame.width())
+            .arg(frame.height()) +
             QString(" -oac mp3lame") +
-            QString(" -lameopts cbr:br=%1").arg(d->settingsForm->getAudioBitrate()) +
-            QString(" -audiofile \"%1\"").arg(d->audioFilename) +
-            QString(" -o \"%1\"").arg(d->settingsForm->getOutputFile());
+            QString(" -lameopts cbr:br=%2")
+            .arg(d->settingsForm->getAudioBitrate()) +
+            QString(" -audiofile \"%1\"")
+            .arg(d->audioFilename) +
+            QString(" -o \"%1\"")
+            .arg(d->settingsForm->getOutputFile());
+    if (addMusicInfoAsSubtitle)
+        cmdLine +=
+                QString(" -sub \"%1\"")
+                .arg(this->getSubtitleFilename()) +
+                QString(" -font \"%1\"").arg(d->settingsForm->getSubtitleFont()) +
+                QString(" -subfont-text-scale 3");
     disableSave();
-    d->process->start(cmdLine);
     d->consoleWidget->clear();
     d->consoleWidget->show();
     d->consoleWidget->out(cmdLine);
+    d->process->start(cmdLine);
+}
+
+
+QString MainWindow::getSubtitleFilename(void) const
+{
+    return d_ptr->settingsForm->getTempDirectory() + "/" + AppName + "-subtitles.srt";
+}
+
+
+QString MainWindow::getFrameFileListFilename(void) const
+{
+    return d_ptr->settingsForm->getTempDirectory() + "/" + AppName + "-list.txt";
+}
+
+
+void MainWindow::removeTemporaryFiles(void)
+{
+    Q_D(MainWindow);
+    foreach (QString tmpImageFile, d->tmpImageFiles)
+        QFile::remove(tmpImageFile);
+    QFile::remove(this->getFrameFileListFilename());
+    QFile::remove(this->getSubtitleFilename());
 }
 
 
@@ -286,6 +353,7 @@ void MainWindow::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     else
         ui->statusBar->showMessage(tr("Warning! MEncoder exited unexpectedly. Video may not have been written."));
     enableSave();
+    removeTemporaryFiles();
 }
 
 
@@ -293,6 +361,14 @@ void MainWindow::audioBufferReady(const QAudioBuffer &buf)
 {
     Q_UNUSED(buf);
     // qDebug() << buf.startTime() << buf.duration() << buf.sampleCount();
+}
+
+
+void MainWindow::metaDataAvailableChanged(bool)
+{
+    Q_D(MainWindow);
+    d->artist = d->audio->metaData("Author").toString();
+    d->title = d->audio->metaData("Title").toString();
 }
 
 
@@ -489,6 +565,8 @@ void MainWindow::saveAppSettings(void)
     settings.setValue("Settings/tmpDir", d->settingsForm->getTempDirectory());
     settings.setValue("Settings/mencoderPath", d->settingsForm->getMencoderPath());
     settings.setValue("Settings/audioBitrate", d->settingsForm->getAudioBitrate());
+    settings.setValue("Settings/lavcOptions", d->settingsForm->getLavcOptions());
+    settings.setValue("Settings/subtitleFont", d->settingsForm->getSubtitleFont());
     settings.setValue("Settings/volume", d->audio->volume());
     settings.setValue("Console/geometry", d->consoleWidget->saveGeometry());
 }
@@ -505,6 +583,8 @@ void MainWindow::restoreAppSettings(void)
     d->settingsForm->setOpenDirectory(settings.value("Settings/openDir", d->settingsForm->getOpenDirectory()).toString());
     d->settingsForm->setTempDirectory(settings.value("Settings/tmpDir", d->settingsForm->getTempDirectory()).toString());
     d->settingsForm->setMencoderPath(settings.value("Settings/mencoderPath", d->settingsForm->getMencoderPath()).toString());
+    d->settingsForm->setLavcOptions(settings.value("Settings/lavcOptions", d->settingsForm->getLavcOptions()).toString());
+    d->settingsForm->setSubtitleFont(settings.value("Settings/subtitleFont", d->settingsForm->getSubtitleFont()).toString());
     d->settingsForm->setAudioBitrate(settings.value("Settings/audioBitrate", d->settingsForm->getAudioBitrate()).toInt());
     d->audio->setVolume(settings.value("Settings/volume", 50).toInt());
 }

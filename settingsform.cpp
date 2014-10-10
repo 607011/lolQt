@@ -21,6 +21,8 @@ SettingsForm::SettingsForm(QDialog *parent)
     ui->outputFileLineEdit->setText(QDir::homePath() + "/output.avi");
     ui->openDirectoryLineEdit->setText(QDir::homePath());
     ui->tmpDirectoryLineEdit->setText(QDir::tempPath());
+    ui->lavcOptionsLineEdit->setText("mpeg4:mbd=2:trell:v4mv:mv0:dia=2");
+    ui->subtitleFontLineEdit->setText(QDir::currentPath() + "/big_noodle_titling.ttf");
 
     QObject::connect(ui->chooseOpenDirectoryPushButton, SIGNAL(clicked()), SLOT(chooseOpenDirectory()));
     QObject::connect(ui->chooseOutputFilePushButton, SIGNAL(clicked()), SLOT(chooseOutputFile()));
@@ -81,6 +83,29 @@ QString SettingsForm::getMencoderPath(void) const
 void SettingsForm::setMencoderPath(const QString &path)
 {
     ui->mencoderPathLineEdit->setText(path);
+}
+
+
+QString SettingsForm::getLavcOptions(void) const
+{
+    return ui->lavcOptionsLineEdit->text();
+}
+
+
+void SettingsForm::setLavcOptions(const QString &lavcOptions)
+{
+    ui->lavcOptionsLineEdit->setText(lavcOptions);
+}
+
+
+QString SettingsForm::getSubtitleFont(void) const
+{
+    return ui->subtitleFontLineEdit->text();
+}
+
+void SettingsForm::setSubtitleFont(const QString &subtitleFont)
+{
+    ui->subtitleFontLineEdit->setText(subtitleFont);
 }
 
 
