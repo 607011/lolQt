@@ -5,7 +5,6 @@
 ## Prerequisites
 
   * [Microsoft Visual C++ 2010 SP1 Redistributable Package (x86)](http://www.microsoft.com/de-de/download/details.aspx?id=8328)
-  * [MEncoder](http://oss.netfarm.it/mplayer-win32.php): For optimal performance choose the correct build for your architecture.
 
 ## Installation
 
@@ -14,7 +13,7 @@
 ## Usage in a nutshell
 
   * Go to Extras/Settings:
-    - Choose path to MEncoder binary.
+    - Check path to MEncoder binary.
     - Choose output file (AVI).
     - Change path to temporary directory if necessary.
     - Change audio bitrate if necessary.
@@ -30,6 +29,7 @@ Changing bpm will change the display speed of the GIF's frame sequence. Unfortun
 ## To-do
 
   * Let the user choose the video dimensions.
+  * Automatic bpm detection.
 
 ## Copyright
 
