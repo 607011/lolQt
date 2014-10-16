@@ -49,6 +49,7 @@ WaveWidget::WaveWidget(QWidget *parent)
     , d_ptr(new WaveWidgetPrivate)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+    setToolTip(tr("Wave diagram"));
 }
 
 

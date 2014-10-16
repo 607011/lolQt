@@ -47,6 +47,7 @@ EnergyWidget::EnergyWidget(QWidget *parent)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     setMaximumWidth(256);
+    setToolTip(tr("Spectral diagram"));
 }
 
 
