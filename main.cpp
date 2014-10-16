@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QTranslator>
+#include <QLocale>
 #include <QtCore/QDebug>
 
 const QString Company = "c't";
@@ -11,12 +12,11 @@ const QString AppName = "lolQt";
 const QString AppUrl = "https://github.com/ola-ct/lolqt";
 const QString AppAuthor = "Oliver Lau";
 const QString AppAuthorMail = "ola@ct.de";
-const QString AppVersionNoDebug = "1.0";
-const QString AppMinorVersion = ".3";
+const QString AppVersionNoDebug = "1.0.3";
 #ifdef QT_NO_DEBUG
-const QString AppVersion = AppVersionNoDebug + AppMinorVersion;
+const QString AppVersion = AppVersionNoDebug;
 #else
-const QString AppVersion = AppVersionNoDebug + AppMinorVersion + " [DEBUG]";
+const QString AppVersion = AppVersionNoDebug + " [DEBUG]";
 #endif
 
 

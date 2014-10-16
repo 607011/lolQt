@@ -12,7 +12,6 @@ extern const QString AppUrl;
 extern const QString AppAuthor;
 extern const QString AppAuthorMail;
 extern const QString AppVersion;
-extern const QString AppMinorVersion;
 extern const QString AppVersionNoDebug;
 
 
