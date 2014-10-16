@@ -3,26 +3,29 @@
 
 #include <QPainter>
 #include <QMimeData>
+#include <QPixmap>
 #include <QUrl>
 #include <QtCore/QDebug>
 
 #include "imagewidget.h"
 
+
 class ImageWidgetPrivate
 {
 public:
-    ImageWidgetPrivate()
-    { /* ... */ }
+    ImageWidgetPrivate(void) {}
 };
 
 
-ImageWidget::ImageWidget(QLabel* parent)
+ImageWidget::ImageWidget(QLabel *parent)
     : QLabel(parent)
     , d_ptr(new ImageWidgetPrivate())
 {
     QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setSizePolicy(sizePolicy);
     setAcceptDrops(true);
+    setPixmap(QPixmap(":/images/drop-icon.png"));
+    setAlignment(Qt::AlignCenter);
 }
 
 

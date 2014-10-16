@@ -4,5 +4,6 @@
     </qresource>
     <qresource prefix="/images">
         <file>waveform.png</file>
+        <file>drop-icon.png</file>
     </qresource>
 </RCC>
