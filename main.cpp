@@ -31,7 +31,6 @@ int main(int argc, char *argv[])
     qApp->addLibraryPath("plugins");
     qApp->addLibraryPath("./plugins");
 
-
 #ifdef Q_OS_MAC
     qApp->addLibraryPath("../plugins");
 #endif
@@ -46,10 +45,10 @@ int main(int argc, char *argv[])
     if (ok) {
         ok = a.installTranslator(&translator);
         if (!ok)
-            qWarning() << "Could not install translator for" << QLocale::system().name() << "locale";
+            qWarning().nospace() << "Warning: Could not install translator for " << QLocale::system().name() << " locale";
     }
     else {
-        qWarning() << "Could not load translations for" << QLocale::system().name() << "locale";
+        qWarning().nospace() << "Warning: Could not load translations for " << QLocale::system().name() << " locale";
     }
 
     MainWindow w;

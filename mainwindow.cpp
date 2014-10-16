@@ -36,7 +36,7 @@ public:
         , consoleWidget(new ConsoleWidget)
         , waveWidget(new WaveWidget)
         , energyWidget(new EnergyWidget)
-        , process(new QProcess)
+        , process(nullptr)
         , movie(new QMovie)
         , audio(new QMediaPlayer)
         , audioDecoder(0)
@@ -106,19 +106,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->horizontalLayout2->addWidget(d->waveWidget);
     QObject::connect(d->waveWidget, SIGNAL(analysisCompleted()), SLOT(analysisCompleted()));
 
-#ifndef QT_NO_DEBUG
     ui->horizontalLayout2->addWidget(d->energyWidget);
-#endif
 
     QObject::connect(ui->actionOpenImage, SIGNAL(triggered()), SLOT(openImage()));
     QObject::connect(ui->actionOpenAudio, SIGNAL(triggered()), SLOT(openAudio()));
-    QObject::connect(ui->actionSaveFrames, SIGNAL(triggered()), SLOT(saveVideo()));
+    QObject::connect(ui->actionSaveFrames, SIGNAL(triggered()), SLOT(onSaveCancelClicked()));
     QObject::connect(ui->actionSaveFramesAs, SIGNAL(triggered()), SLOT(saveVideoAs()));
     QObject::connect(ui->actionQuit, SIGNAL(triggered()), SLOT(close()));
     QObject::connect(ui->actionAbout, SIGNAL(triggered()), SLOT(about()));
     QObject::connect(ui->actionSettings, SIGNAL(triggered()), SLOT(showSettings()));
     QObject::connect(ui->actionViewConsole, SIGNAL(toggled(bool)), SLOT(showConsole(bool)));
-    QObject::connect(ui->saveFramesButton, SIGNAL(clicked()), SLOT(saveVideo()));
+    QObject::connect(ui->saveFramesButton, SIGNAL(clicked()), SLOT(onSaveCancelClicked()));
     QObject::connect(ui->beatMePushButton, SIGNAL(clicked()), SLOT(countBeat()));
     QObject::connect(d->imageWidget, SIGNAL(gifDropped(QString)), SLOT(analyzeMovie(QString)));
     QObject::connect(d->imageWidget, SIGNAL(musicDropped(QString)), SLOT(analyzeAudio(QString)));
@@ -131,9 +129,6 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(d->audio, SIGNAL(metaDataAvailableChanged(bool)), SLOT(metaDataAvailableChanged(bool)));
     QObject::connect(d->probe, SIGNAL(audioBufferProbed(QAudioBuffer)), SLOT(audioBufferReady(QAudioBuffer)));
     QObject::connect(ui->bpmSpinBox, SIGNAL(valueChanged(double)), SLOT(bpmChanged(double)));
-    QObject::connect(d->process, SIGNAL(readyReadStandardOutput()), SLOT(processOutput()));
-    QObject::connect(d->process, SIGNAL(readyReadStandardError()), SLOT(processErrorOutput()));
-    QObject::connect(d->process, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(processFinished(int,QProcess::ExitStatus)));
 
     QObject::connect(d->audio, SIGNAL(volumeChanged(int)), ui->volumeDial, SLOT(setValue(int)));
     QObject::connect(ui->volumeDial, SIGNAL(valueChanged(int)), d->audio, SLOT(setVolume(int)));
@@ -154,17 +149,10 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     Q_D(MainWindow);
-    if (d->process->state() == QProcess::Running) {
-        QMessageBox::StandardButton button;
-        button = QMessageBox::question(this,
-                                       tr("Really exit?"),
-                                       tr("The encoder is running in the background."
-                                          " If you quit, the process will be cancelled and the results be lost."
-                                          " Do you really want to quit?"));
-        if (button != QMessageBox::Yes)
-            return e->ignore();
-        d->process->close();
-    }
+    if (!processAllowedToBeCanceled())
+        return e->ignore();
+    if (d->process != nullptr)
+        deleteProcess();
     saveAppSettings();
     cancelAudioAnalysis();
     removeTemporaryFiles();
@@ -223,6 +211,47 @@ void MainWindow::saveVideoAs(void)
 }
 
 
+int gcd(int a, int b) {
+    int tmp;
+    while (a != 0) {
+        tmp = a;
+        a = b % a;
+        b = tmp;
+    }
+    return b;
+}
+
+
+void MainWindow::onSaveCancelClicked(void)
+{
+    Q_D(MainWindow);
+    if (d->process == nullptr)
+        createProcess();
+    switch(d->process->state()) {
+    case QProcess::NotRunning:
+    {
+        saveVideo();
+        break;
+    }
+    case QProcess::Starting:
+    case QProcess::Running:
+    default:
+        cancelEncoding();
+        break;
+    }
+}
+
+
+void MainWindow::cancelEncoding(void)
+{
+    Q_D(MainWindow);
+    ui->statusBar->showMessage(tr("Encoding canceled."), 3000);
+    d->process->kill();
+    deleteProcess();
+    enableSave();
+}
+
+
 void MainWindow::saveVideo(void)
 {
     Q_D(MainWindow);
@@ -237,38 +266,41 @@ void MainWindow::saveVideo(void)
             return;
     }
     bool addMusicInfoAsSubtitle = false;
-    if (!d->artist.isEmpty() && !d->title.isEmpty() && d->audio->duration() > 11 * 1000) {
-        QFile subtitleFile(this->getSubtitleFilename());
-        const QTime &subStartTime = QTime::fromMSecsSinceStartOfDay(d->audio->duration() - 11 * 1000);
-        const QTime &subEndTime = QTime::fromMSecsSinceStartOfDay(d->audio->duration()- 1 * 1000);
-        if (subtitleFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            subtitleFile.write("1\n");
-            subtitleFile.write(QString("%1:%2:%3,000 --> %4:%5:%6,000\n")
-                               .arg(subStartTime.hour(), 2, 10, QChar('0'))
-                               .arg(subStartTime.minute(), 2, 10, QChar('0'))
-                               .arg(subStartTime.second(), 2, 10, QChar('0'))
-                               .arg(subEndTime.hour(), 2, 10, QChar('0'))
-                               .arg(subEndTime.minute(), 2, 10, QChar('0'))
-                               .arg(subEndTime.second(), 2, 10, QChar('0'))
-                               .toLocal8Bit());
-            subtitleFile.write(tr("Music: %1 - %2")
-                               .arg(d->artist)
-                               .arg(d->title).toLocal8Bit());
-            subtitleFile.close();
+    if (d->settingsForm->getSubtitlesEnabled()) {
+        if (!d->artist.isEmpty() && !d->title.isEmpty() && d->audio->duration() > 11 * 1000) {
+            QFile subtitleFile(this->getSubtitleFilename());
+            const QTime &subStartTime = QTime::fromMSecsSinceStartOfDay(d->audio->duration() - 11 * 1000);
+            const QTime &subEndTime = QTime::fromMSecsSinceStartOfDay(d->audio->duration()- 1 * 1000);
+            if (subtitleFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                subtitleFile.write("1\n");
+                subtitleFile.write(QString("%1:%2:%3,000 --> %4:%5:%6,000\n")
+                                   .arg(subStartTime.hour(), 2, 10, QChar('0'))
+                                   .arg(subStartTime.minute(), 2, 10, QChar('0'))
+                                   .arg(subStartTime.second(), 2, 10, QChar('0'))
+                                   .arg(subEndTime.hour(), 2, 10, QChar('0'))
+                                   .arg(subEndTime.minute(), 2, 10, QChar('0'))
+                                   .arg(subEndTime.second(), 2, 10, QChar('0'))
+                                   .toLocal8Bit());
+                subtitleFile.write(tr("Music: %1 - %2")
+                                   .arg(d->artist)
+                                   .arg(d->title).toLocal8Bit());
+                subtitleFile.close();
+            }
+            addMusicInfoAsSubtitle = true;
         }
-        addMusicInfoAsSubtitle = true;
     }
     QFile frameFileList(this->getFrameFileListFilename());
-    const int N = d->tmpImageFiles.count();
-    Q_ASSERT(N > 0);
     if (frameFileList.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        const int N = d->tmpImageFiles.count();
+        const int frameOffset = ui->offsetSpinBox->value();
         for (int i = 0; i < d->framesNeeded; ++i) {
-            frameFileList.write(d->tmpImageFiles[i % N].toLocal8Bit());
+            frameFileList.write(d->tmpImageFiles[(i + frameOffset) % N].toLocal8Bit());
             frameFileList.write("\n");
         }
         frameFileList.close();
     }
     const QImage &frame = d->movie->currentImage();
+    int aspectDiv = gcd(frame.width(), frame.height());
     QString cmdLine =
             QString("\"%1\"")
             .arg(d->settingsForm->getMencoderPath()) +
@@ -282,8 +314,8 @@ void MainWindow::saveVideo(void)
             QString(" -ovc lavc") +
             QString(" -lavcopts vcodec=%1:aspect=%2/%3")
             .arg(d->settingsForm->getLavcOptions())
-            .arg(frame.width())
-            .arg(frame.height()) +
+            .arg(frame.width() / aspectDiv)
+            .arg(frame.height() / aspectDiv) +
             QString(" -oac mp3lame") +
             QString(" -lameopts cbr:br=%2")
             .arg(d->settingsForm->getAudioBitrate()) +
@@ -302,6 +334,53 @@ void MainWindow::saveVideo(void)
     d->consoleWidget->show();
     d->consoleWidget->out(cmdLine);
     d->process->start(cmdLine);
+}
+
+
+void MainWindow::createProcess(void)
+{
+    Q_D(MainWindow);
+    d->process = new QProcess;
+    QObject::connect(d->process, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()));
+    QObject::connect(d->process, SIGNAL(readyReadStandardError()), this, SLOT(processErrorOutput()));
+    QObject::connect(d->process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
+}
+
+
+void MainWindow::deleteProcess(void)
+{
+    Q_D(MainWindow);
+    Q_ASSERT(d->process != nullptr);
+    QObject::disconnect(d->process, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()));
+    QObject::disconnect(d->process, SIGNAL(readyReadStandardError()), this, SLOT(processErrorOutput()));
+    QObject::disconnect(d->process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
+    d->process->waitForFinished();
+    delete d->process;
+    d->process = nullptr;
+    d->consoleWidget->clear();
+    d->consoleWidget->hide();
+}
+
+
+bool MainWindow::processAllowedToBeCanceled(void)
+{
+    Q_D(MainWindow);
+    if (d->process != nullptr && d->process->state() == QProcess::Running) {
+        QMessageBox::StandardButton button;
+        button = QMessageBox::question(this,
+                                     tr("Really exit?"),
+                                     tr("The encoder is running in the background."
+                                        " If you quit, the process will be cancelled and the results be lost."
+                                        " Do you really want to quit?"));
+        if (button == QMessageBox::Yes) {
+            d->process->close();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    return true;
 }
 
 
@@ -353,6 +432,7 @@ void MainWindow::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     else
         ui->statusBar->showMessage(tr("Warning! MEncoder exited unexpectedly. Video may not have been written."));
     enableSave();
+    deleteProcess();
     removeTemporaryFiles();
 }
 
@@ -429,11 +509,15 @@ void MainWindow::analyzeMovie(const QString &fileName)
     d->movie->stop();
     d->movie->setFileName(fileName);
     QFileInfo fi(fileName);
-    if (d->movie->isValid() && d->movie->frameCount() > 0) {
+    const int nFrames = d->movie->frameCount();
+    if (d->movie->isValid() && nFrames > 0) {
+        ui->offsetSpinBox->setMaximum(nFrames - 1);
+        ui->offsetSpinBox->setValue(0);
+        ui->offsetSpinBox->setEnabled(true);
         d->tmpImageFiles.clear();
         qreal duration = 0;
         d->movie->jumpToFrame(0);
-        for (int i = 0; i < d->movie->frameCount(); ++i) {
+        for (int i = 0; i < nFrames; ++i) {
             const QString &fqSavePath =
                     d->settingsForm->getTempDirectory() +
                     "/" +
@@ -444,10 +528,10 @@ void MainWindow::analyzeMovie(const QString &fileName)
             d->tmpImageFiles.push_back(fqSavePath);
             d->movie->jumpToNextFrame();
         }
-        d->originalFPS = 1e3 * qreal(d->movie->frameCount()) / duration;
+        d->originalFPS = 1e3 * qreal(nFrames) / duration;
         d->fps = d->originalFPS;
         ui->statusBar->showMessage(tr("%1 frames, %2 fps, %3 ms")
-                                   .arg(d->movie->frameCount())
+                                   .arg(nFrames)
                                    .arg(d->originalFPS, 0, 'g', 4)
                                    .arg(int(duration)), 3000);
         if (!d->audioFilename.isEmpty())
@@ -458,6 +542,7 @@ void MainWindow::analyzeMovie(const QString &fileName)
     }
     else {
         disableSave();
+        ui->offsetSpinBox->setEnabled(false);
     }
 }
 
@@ -592,7 +677,7 @@ void MainWindow::restoreAppSettings(void)
 
 void MainWindow::about(void)
 {
-    QMessageBox::about(this, tr("About %1 %2%3").arg(AppName).arg(AppVersionNoDebug).arg(AppMinorVersion),
+    QMessageBox::about(this, tr("About %1 %2").arg(AppName).arg(AppVersionNoDebug),
                        tr("<p><b>%1</b> merges animated GIFs and music into videos. "
                           "See <a href=\"%2\" title=\"%1 project homepage\">%2</a> for more info.</p>"
                           "<p>Copyright &copy; 2014 %3 &lt;%4&gt;, Heise Zeitschriften Verlag.</p>"
@@ -613,6 +698,7 @@ void MainWindow::about(void)
 
 void MainWindow::enableSave(void)
 {
+    ui->saveFramesButton->setText(tr("Save frames"));
     ui->saveFramesButton->setEnabled(true);
     ui->actionSaveFramesAs->setEnabled(true);
     ui->actionSaveFrames->setEnabled(true);
@@ -621,7 +707,8 @@ void MainWindow::enableSave(void)
 
 void MainWindow::disableSave(void)
 {
-    ui->saveFramesButton->setEnabled(false);
+    ui->saveFramesButton->setText(tr("Stop encoding"));
+    // ui->saveFramesButton->setEnabled(false);
     ui->actionSaveFramesAs->setEnabled(false);
     ui->actionSaveFrames->setEnabled(false);
 }

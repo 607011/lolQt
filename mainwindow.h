@@ -33,8 +33,8 @@ private slots:
     void showSettings(void);
     void openImage(void);
     void openAudio(void);
-    void saveVideo(void);
     void saveVideoAs(void);
+    void onSaveCancelClicked(void);
     void about(void);
     void analyzeMovie(const QString &fileName);
     void analyzeAudio(const QString &fileName);
@@ -54,12 +54,17 @@ private slots:
     void analysisCompleted(void);
 
 private: // methods
+    void cancelEncoding(void);
+    void saveVideo(void);
     void saveAppSettings(void);
     void restoreAppSettings(void);
+    void createProcess(void);
+    void deleteProcess(void);
+    bool processAllowedToBeCanceled(void);
     void enableSave(void);
     void disableSave(void);
     void calculateFPS(void);
-    void cancelAudioAnalysis();
+    void cancelAudioAnalysis(void);
     QString getSubtitleFilename(void) const;
     QString getFrameFileListFilename(void) const;
     void removeTemporaryFiles(void);
