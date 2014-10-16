@@ -1,4 +1,4 @@
-!define VERSION "1.0.3"
+!define VERSION "1.0.4"
 !define APP "lolQt"
 !define PUBLISHER "c't"
 !define QTPATH "D:\Developer\Qt-5.3.1\5.3\msvc2012_opengl"
@@ -20,7 +20,7 @@ Page directory
 Page instfiles
 
 
-;Section "Visual Studio 2012 edistributables"
+;Section "Visual Studio 2012 redistributables"
 ;  File D:\Developer\Qt-5.3\vcredist\vcredist_sp1_x86.exe
 ;SectionEnd
 

@@ -3,7 +3,7 @@
 
 QT       += core gui multimedia concurrent
 
-VERSION = 1.0.2
+VERSION = 1.0.4
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
