@@ -1,6 +1,7 @@
 !define VERSION "1.0.3"
 !define APP "lolQt"
 !define PUBLISHER "c't"
+!define QTPATH "D:\Developer\Qt-5.3.1\5.3\msvc2012_opengl"
 
 Name "${APP} ${VERSION}"
 OutFile "${APP}-${VERSION}-setup.exe"
@@ -39,24 +40,26 @@ Section "lolQt"
   CreateDirectory $INSTDIR\sampledata
   File v${VERSION}\lolQt.exe
   File v${VERSION}\lolQt.exe.embed.manifest
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\icudt52.dll
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\icuin52.dll
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\icuuc52.dll
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\Qt5Concurrent.dll
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\Qt5Core.dll
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\Qt5Gui.dll
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\Qt5Multimedia.dll
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\Qt5Network.dll
-  File D:\Developer\Qt-5.3\5.3\msvc2012_opengl\bin\Qt5Widgets.dll
+  File ${QTPATH}\bin\icudt52.dll
+  File ${QTPATH}\bin\icuin52.dll
+  File ${QTPATH}\bin\icuuc52.dll
+  File ${QTPATH}\bin\Qt5Concurrent.dll
+  File ${QTPATH}\bin\Qt5Core.dll
+  File ${QTPATH}\bin\Qt5Gui.dll
+  File ${QTPATH}\bin\Qt5Multimedia.dll
+  File ${QTPATH}\bin\Qt5Network.dll
+  File ${QTPATH}\bin\Qt5Widgets.dll
   File ..\LICENSE
   File mencoder.exe
-  File /oname=sampledata\cat.gif sampledata\thirsty-cat.gif
-  File /oname=plugins\imageformats\qgif.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\imageformats\qgif.dll
-  File /oname=platforms\qminimal.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\platforms\qminimal.dll
-  File /oname=platforms\qwindows.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\platforms\qwindows.dll
-  File /oname=mediaservice\dsengine.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\mediaservice\dsengine.dll
-  File /oname=mediaservice\qtmedia_audioengine.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\mediaservice\qtmedia_audioengine.dll
-  File /oname=mediaservice\wmfengine.dll D:\Developer\Qt-5.3\5.3\msvc2012_opengl\plugins\mediaservice\wmfengine.dll
+  File big_noodle_titling.ttf
+  File /oname=sampledata\thirsty-cat.gif sampledata\thirsty-cat.gif
+  File /oname=sampledata\banging-bear.gif sampledata\banging-bear.gif
+  File /oname=plugins\imageformats\qgif.dll ${QTPATH}\plugins\imageformats\qgif.dll
+  File /oname=platforms\qminimal.dll ${QTPATH}\plugins\platforms\qminimal.dll
+  File /oname=platforms\qwindows.dll ${QTPATH}\plugins\platforms\qwindows.dll
+  File /oname=mediaservice\dsengine.dll ${QTPATH}\plugins\mediaservice\dsengine.dll
+  File /oname=mediaservice\qtmedia_audioengine.dll ${QTPATH}\plugins\mediaservice\qtmedia_audioengine.dll
+  File /oname=mediaservice\wmfengine.dll ${QTPATH}\plugins\mediaservice\wmfengine.dll
   WriteUninstaller $INSTDIR\uninstall.exe
 SectionEnd
 
@@ -76,7 +79,7 @@ Section "Uninstall"
   Delete $INSTDIR\lolQt.exe.embed.manifest
   Delete $INSTDIR\LICENSE
   Delete $INSTDIR\mencoder.exe
-  Delete $INSTDIR\uninstall.exe
+  Delete $INSTDIR\big_noodle_titling.ttf
   Delete $INSTDIR\icudt52.dll
   Delete $INSTDIR\icuin52.dll
   Delete $INSTDIR\icuuc52.dll
@@ -86,6 +89,7 @@ Section "Uninstall"
   Delete $INSTDIR\Qt5Multimedia.dll
   Delete $INSTDIR\Qt5Network.dll
   Delete $INSTDIR\Qt5Widgets.dll
+  Delete $INSTDIR\uninstall.exe
 
   Delete $INSTDIR\mediaservice\dsengine.dll
   Delete $INSTDIR\mediaservice\qtmedia_audioengine.dll
