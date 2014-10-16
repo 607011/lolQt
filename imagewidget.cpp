@@ -29,43 +29,52 @@ ImageWidget::ImageWidget(QLabel *parent)
 }
 
 
-void ImageWidget::dragEnterEvent(QDragEnterEvent* e)
+static const QRegExp gReAudio("\\.(mp3|m4a)$");
+static const QRegExp gReVideo("\\.(gif)$");
+
+
+void ImageWidget::dragEnterEvent(QDragEnterEvent *e)
 {
-    const QMimeData* const d = e->mimeData();
-    if (d->hasUrls() && d->urls().first().toString().contains(QRegExp("\\.(png|gif|mp3|m4a)$")))
+    const QMimeData *const d = e->mimeData();
+    bool doAccept = d->hasUrls();
+    foreach (QUrl url, d->urls()) {
+        const QString &fileUrl = url.toString();
+        doAccept &= fileUrl.contains(gReAudio) || fileUrl.contains(gReVideo);
+    }
+    if (doAccept)
         e->acceptProposedAction();
     else
         e->ignore();
 }
 
 
-void ImageWidget::dragLeaveEvent(QDragLeaveEvent* e)
+void ImageWidget::dragLeaveEvent(QDragLeaveEvent *e)
 {
     e->accept();
 }
 
 
-void ImageWidget::dropEvent(QDropEvent* e)
+void ImageWidget::dropEvent(QDropEvent *e)
 {
-    const QMimeData* const d = e->mimeData();
-    if (d->hasUrls()) {
-        QString fileUrl = d->urls().first().toString();
+    const QMimeData *const d = e->mimeData();
+    foreach (QUrl url, d->urls()) {
+        QString fileUrl = url.toString();
 #ifdef WIN32
         fileUrl = fileUrl.remove("file:///");
 #else
         fileUrl = fileUrl.remove("file://");
 #endif
-        if (fileUrl.endsWith((".gif")) || fileUrl.endsWith((".png"))) {
+        if (fileUrl.contains(gReVideo)) {
             loadImage(fileUrl);
         }
-        else if (fileUrl.endsWith((".mp3")) || fileUrl.endsWith(".m4a")) {
+        else if (fileUrl.contains(gReAudio)) {
             loadMusic(fileUrl);
         }
     }
 }
 
 
-void ImageWidget::loadImage(const QString& fileName)
+void ImageWidget::loadImage(const QString &fileName)
 {
     if (fileName.isEmpty()) {
         qWarning() << "ImageWidget::loadImage(): fileName is empty.";
@@ -75,7 +84,7 @@ void ImageWidget::loadImage(const QString& fileName)
 }
 
 
-void ImageWidget::loadMusic(const QString& fileName)
+void ImageWidget::loadMusic(const QString &fileName)
 {
     if (fileName.isEmpty()) {
         qWarning() << "ImageWidget::loadMusic(): fileName is empty.";
