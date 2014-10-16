@@ -23,9 +23,14 @@ const QString AppVersion = AppVersionNoDebug + " [DEBUG]";
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
+    a.setOrganizationName(Company);
+    a.setOrganizationDomain(Company);
+    a.setApplicationName(AppName);
+    a.setApplicationVersion(AppVersionNoDebug);
+
     qApp->addLibraryPath("plugins");
     qApp->addLibraryPath("./plugins");
+
 
 #ifdef Q_OS_MAC
     qApp->addLibraryPath("../plugins");
@@ -36,14 +41,18 @@ int main(int argc, char *argv[])
 #endif
 
     QTranslator translator;
-    bool ok = translator.load(":/translations/lolqt-" + QLocale::system().name());
-#ifndef QT_NO_DEBUG
-    if (!ok)
+    QString translationFile = QString(":/translations/lolqt-%1").arg(QLocale::system().name());
+    bool ok = translator.load(translationFile);
+    if (ok) {
+        ok = a.installTranslator(&translator);
+        if (!ok)
+            qWarning() << "Could not install translator for" << QLocale::system().name() << "locale";
+    }
+    else {
         qWarning() << "Could not load translations for" << QLocale::system().name() << "locale";
-#endif
-    if (ok)
-        a.installTranslator(&translator);
+    }
 
+    MainWindow w;
     w.show();
     return a.exec();
 }

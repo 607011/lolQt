@@ -10,7 +10,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = lolQt
 TEMPLATE = app
 
-TRANSLATIONS = lolQt-de_DE.ts
+TRANSLATIONS = lolqt-de_DE.ts
+
+CODECFORTR = UTF-8
 
 win32 {
 RC_FILE = lolqt.rc
@@ -47,7 +49,8 @@ OTHER_FILES += \
     LICENSE \
     deploy/lolqt.nsi \
     lolqt.rc \
-    LIESMICH.md
+    LIESMICH.md \
+    lolqt-de_DE.ts
 
 RESOURCES += \
     lolqt.qrc
