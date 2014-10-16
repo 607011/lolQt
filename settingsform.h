@@ -32,6 +32,8 @@ public:
     void setSubtitleFont(const QString&);
     int getAudioBitrate(void) const;
     void setAudioBitrate(int);
+    bool getSubtitlesEnabled(void) const;
+    void setSubtitlesEnabled(bool);
 
 public slots:
     bool chooseOutputFile(void);

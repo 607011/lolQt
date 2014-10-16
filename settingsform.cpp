@@ -121,6 +121,18 @@ void SettingsForm::setAudioBitrate(int kbps)
 }
 
 
+bool SettingsForm::getSubtitlesEnabled() const
+{
+    return ui->showArtistTitleCheckBox->isChecked();
+}
+
+
+void SettingsForm::setSubtitlesEnabled(bool enabled)
+{
+    ui->showArtistTitleCheckBox->setChecked(enabled);
+}
+
+
 bool SettingsForm::chooseOutputFile(void)
 {
     const QString &outDir =
