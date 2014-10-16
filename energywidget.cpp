@@ -70,24 +70,19 @@ void EnergyWidget::analyzeSamples(void)
         j += BinSize;
         if (j > d->samples.size())
             break;
-
         d->fft.perform(src, spectrum);
         src += BinSize;
-
         d->spectrumMutex.lock();
         for (int i = 0; i < NBins; ++i) {
             d->spectrum[i] = spectrum[i].r;
             d->spectrum2[i] = spectrum[i].i;
         }
         d->spectrumMutex.unlock();
-
-
         qreal maxEnergy = 0;
         for (int i = 0; i < NBins; ++i) {
             if (spectrum[i].r > maxEnergy)
                 maxEnergy = spectrum[i].r;
         }
-
         if (t0.elapsed() > 40) {
             d->percentReady = int(100 * j / d->samples.size());
             update();
@@ -158,11 +153,9 @@ void EnergyWidget::paintEvent(QPaintEvent*)
     d->spectrumMutex.lock();
     for (int i = 0; i < NBins / xd; ++i)
         path1.addRect(xd * (i - 1) * xs, height(), xd * xs, -qAbs(d->spectrum[i] * ys));
-    d->spectrumMutex.unlock();
     p.drawPath(path1);
     p.setBrush(QColor(0xcc, 0x33, 0xee, 0xc0));
     QPainterPath path2;
-    d->spectrumMutex.lock();
     for (int i = 0; i < NBins / xd; ++i)
         path2.addRect(xd * (i - 1) * xs, 0, xd * xs, qAbs(d->spectrum2[i] * ys));
     d->spectrumMutex.unlock();
