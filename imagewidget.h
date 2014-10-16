@@ -23,9 +23,10 @@ class ImageWidget : public QLabel
     Q_OBJECT
 
 public:
-    explicit ImageWidget(QLabel *parent = NULL);
+    explicit ImageWidget(QLabel *parent = nullptr);
     QSizePolicy sizePolicy(void) const { return QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); }
-    QSize minimumSizeHint(void) const { return QSize(320, 240); }
+    QSize minimumSizeHint(void) const { return QSize(180, 105); }
+    QSize sizeHint(void) const { return QSize(320, 240); }
 
 signals:
     void gifDropped(const QString &fileName);

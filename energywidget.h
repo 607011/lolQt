@@ -17,7 +17,7 @@ class EnergyWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit EnergyWidget(QWidget *parent = 0);
+    explicit EnergyWidget(QWidget *parent = nullptr);
     ~EnergyWidget();
     QSize sizeHint(void) const { return QSize(128, 128); }
     QSize minimumSizeHint(void) const { return QSize(128, 64); }
