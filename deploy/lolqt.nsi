@@ -1,4 +1,4 @@
-!define VERSION "1.0.4"
+!define VERSION "1.0.5"
 !define APP "lolQt"
 !define PUBLISHER "c't"
 !define QTPATH "D:\Developer\Qt-5.3.1\5.3\msvc2012_opengl"
@@ -54,6 +54,7 @@ Section "lolQt"
   File big_noodle_titling.ttf
   File /oname=sampledata\thirsty-cat.gif sampledata\thirsty-cat.gif
   File /oname=sampledata\banging-bear.gif sampledata\banging-bear.gif
+  File /oname=sampledata\cat-on-treadmill.gif sampledata\cat-on-treadmill.gif
   File /oname=plugins\imageformats\qgif.dll ${QTPATH}\plugins\imageformats\qgif.dll
   File /oname=platforms\qminimal.dll ${QTPATH}\plugins\platforms\qminimal.dll
   File /oname=platforms\qwindows.dll ${QTPATH}\plugins\platforms\qwindows.dll
@@ -106,6 +107,8 @@ Section "Uninstall"
   RMDir $INSTDIR\plugins
 
   Delete $INSTDIR\sampledata\thirsty-cat.gif
+  Delete $INSTDIR\sampledata\banging-bear.gif
+  Delete $INSTDIR\sampledata\cat-on-treadmill.gif
   RMDir $INSTDIR\sampledata
   RMDir $INSTDIR
 

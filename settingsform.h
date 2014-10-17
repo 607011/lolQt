@@ -5,10 +5,13 @@
 #define __SETTINGSFORM_H_
 
 #include <QDialog>
+#include <QScopedPointer>
 
 namespace Ui {
 class SettingsForm;
 }
+
+class SettingsFormPrivate;
 
 class SettingsForm : public QDialog
 {
@@ -26,8 +29,8 @@ public:
     void setTempDirectory(const QString&);
     QString getMencoderPath(void) const;
     void setMencoderPath(const QString&);
-    QString getLavcOptions(void) const;
-    void setLavcOptions(const QString&);
+    QString getMEncoderOptions(void) const;
+    void setMEncoderOptions(const QString&);
     QString getSubtitleFont(void) const;
     void setSubtitleFont(const QString&);
     int getAudioBitrate(void) const;
@@ -41,11 +44,18 @@ public slots:
     void chooseTempDirectory(void);
     void chooseMencoder(void);
 
+private slots:
+    void mencoderPresetChanged(int);
+    void mencoderOptionsChanged(void);
+
 private: // methods
 
 private: // variables
     Ui::SettingsForm *ui;
 
+    QScopedPointer<SettingsFormPrivate> d_ptr;
+    Q_DECLARE_PRIVATE(SettingsForm)
+    Q_DISABLE_COPY(SettingsForm)
 };
 
 #endif // __SETTINGSFORM_H_

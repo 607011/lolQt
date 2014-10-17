@@ -7,10 +7,21 @@
 
 #include <QDir>
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QtCore/QDebug>
+
+class SettingsFormPrivate {
+public:
+    SettingsFormPrivate(void)
+        : dirty(false)
+    { /* ... */ }
+    bool dirty;
+};
 
 SettingsForm::SettingsForm(QDialog *parent)
     : QDialog(parent)
     , ui(new Ui::SettingsForm)
+    , d_ptr(new SettingsFormPrivate)
 {
     ui->setupUi(this);
 
@@ -21,7 +32,12 @@ SettingsForm::SettingsForm(QDialog *parent)
     ui->outputFileLineEdit->setText(QDir::homePath() + "/output.avi");
     ui->openDirectoryLineEdit->setText(QDir::homePath());
     ui->tmpDirectoryLineEdit->setText(QDir::tempPath());
-    ui->lavcOptionsLineEdit->setText("mpeg4:mbd=2:trell:v4mv:mv0:dia=2");
+    ui->mencoderOptionsPlainTextEdit->setPlainText("-mf w=%1:h=%2:fps=%3:type=png"
+                                         " -of avi"
+                                         " -ovc lavc"
+                                         " -lavcopts vcodec=mpeg4:mbd=2:trell:v4mv:mv0:dia=2:aspect=%4/%5"
+                                         " -oac mp3lame"
+                                         " -lameopts cbr:br=%6");
     ui->subtitleFontLineEdit->setText(QDir::currentPath() + "/big_noodle_titling.ttf");
 
     QObject::connect(ui->chooseOpenDirectoryPushButton, SIGNAL(clicked()), SLOT(chooseOpenDirectory()));
@@ -29,6 +45,25 @@ SettingsForm::SettingsForm(QDialog *parent)
     QObject::connect(ui->chooseTmpDirectoryPushButton, SIGNAL(clicked()), SLOT(chooseTempDirectory()));
     QObject::connect(ui->chooseMencoderPushButton, SIGNAL(clicked()), SLOT(chooseMencoder()));
     QObject::connect(ui->closePushButton, SIGNAL(clicked()), SLOT(close()));
+    QObject::connect(ui->mencoderPresetsComboBox, SIGNAL(currentIndexChanged(int)), SLOT(mencoderPresetChanged(int)));
+    QObject::connect(ui->mencoderOptionsPlainTextEdit, SIGNAL(textChanged()), SLOT(mencoderOptionsChanged()));
+
+    // see https://wiki.archlinux.org/index.php/MEncoder
+    ui->mencoderPresetsComboBox->addItem(QString(), QVariant());
+    ui->mencoderPresetsComboBox->addItem(
+                tr("high quality MPEG4 (lavc) encoding"),
+                "-mf w=%1:h=%2:fps=%3:type=png "
+                "-of avi -ovc lavc "
+                "-lavcopts vcodec=mpeg4:mbd=2:trell:v4mv:mv0:dia=2:aspect=%4/%5 "
+                "-oac copy");
+    ui->mencoderPresetsComboBox->addItem(
+                tr("high quality H.264 (x264) encoding"),
+                "-mf w=%1:h=%2:fps=%3:type=png "
+                "-oac copy -ovc x264 "
+                "-x264encopts preset=veryslow:tune=film:crf=15:frameref=15:fast_pskip=0:threads=%7 "
+                "-ofps %3");
+    qDebug() << "EOF SettingsForm::SettingsForm()";
+    d_ptr->dirty = false;
 }
 
 
@@ -86,15 +121,15 @@ void SettingsForm::setMencoderPath(const QString &path)
 }
 
 
-QString SettingsForm::getLavcOptions(void) const
+QString SettingsForm::getMEncoderOptions(void) const
 {
-    return ui->lavcOptionsLineEdit->text();
+    return ui->mencoderOptionsPlainTextEdit->toPlainText().replace("\n", " ");
 }
 
 
-void SettingsForm::setLavcOptions(const QString &lavcOptions)
+void SettingsForm::setMEncoderOptions(const QString &mencoderOptions)
 {
-    ui->lavcOptionsLineEdit->setText(lavcOptions);
+    ui->mencoderOptionsPlainTextEdit->setPlainText(mencoderOptions);
 }
 
 
@@ -149,9 +184,10 @@ bool SettingsForm::chooseOutputFile(void)
 void SettingsForm::chooseOpenDirectory(void)
 {
     const QString &outDir =
-            QFileDialog::getExistingDirectory(this,
-                                              tr("Select open directory"),
-                                              ui->openDirectoryLineEdit->text());
+            QFileDialog::getExistingDirectory(
+                this,
+                tr("Select open directory"),
+                ui->openDirectoryLineEdit->text());
     if (outDir.isEmpty())
         return;
     ui->openDirectoryLineEdit->setText(outDir);
@@ -161,9 +197,10 @@ void SettingsForm::chooseOpenDirectory(void)
 void SettingsForm::chooseTempDirectory(void)
 {
     const QString &outDir =
-            QFileDialog::getExistingDirectory(this,
-                                              tr("Select directory for temporary files"),
-                                              ui->tmpDirectoryLineEdit->text());
+            QFileDialog::getExistingDirectory(
+                this,
+                tr("Select directory for temporary files"),
+                ui->tmpDirectoryLineEdit->text());
     if (outDir.isEmpty())
         return;
     ui->tmpDirectoryLineEdit->setText(outDir);
@@ -177,4 +214,35 @@ void SettingsForm::chooseMencoder(void)
     if (path.isEmpty())
         return;
     ui->mencoderPathLineEdit->setText(path);
+}
+
+
+void SettingsForm::mencoderPresetChanged(int idx)
+{
+    Q_D(SettingsForm);
+    bool doOverwrite = true;
+    if (d->dirty) {
+        QMessageBox::StandardButton choice = QMessageBox::question(
+                    this,
+                    tr("Really overwrite changes?"),
+                    tr("You've made changes to the MEncoder options. "
+                       "Do you really want to overwrite them by choosing a preset?"));
+        if (choice != QMessageBox::Yes)
+            doOverwrite = false;
+    }
+    if (doOverwrite) {
+        const QVariant &data = ui->mencoderPresetsComboBox->itemData(idx);
+        if (!data.isNull()) {
+            ui->mencoderOptionsPlainTextEdit->setPlainText(data.toString());
+            d->dirty = false;
+        }
+    }
+}
+
+
+void SettingsForm::mencoderOptionsChanged(void)
+{
+    Q_D(SettingsForm);
+    qDebug() << "SettingsForm::mencoderOptionsChanged()";
+    d->dirty = true;
 }

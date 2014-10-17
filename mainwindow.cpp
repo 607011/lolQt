@@ -10,6 +10,7 @@
 #include <QAudioDecoder>
 #include <QAudioBuffer>
 #include <QAudioProbe>
+#include <QThread>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -174,10 +175,11 @@ void MainWindow::openImage(void)
 {
     Q_D(MainWindow);
     const QString &fileName =
-            QFileDialog::getOpenFileName(this,
-                                         tr("Open animated GIF"),
-                                         d->settingsForm->getOpenDirectory(),
-                                         tr("Animated GIF images (*.gif)"));
+            QFileDialog::getOpenFileName(
+                this,
+                tr("Open animated GIF"),
+                d->settingsForm->getOpenDirectory(),
+                tr("Animated GIF images (*.gif)"));
     if (fileName.isEmpty())
         return;
     QFileInfo fi(fileName);
@@ -190,10 +192,11 @@ void MainWindow::openAudio(void)
 {
     Q_D(MainWindow);
     const QString &fileName =
-            QFileDialog::getOpenFileName(this,
-                                         tr("Open audio file"),
-                                         d->settingsForm->getOpenDirectory(),
-                                         tr("Audio files (*.mp3)"));
+            QFileDialog::getOpenFileName(
+                this,
+                tr("Open audio file"),
+                d->settingsForm->getOpenDirectory(),
+                tr("Audio files (*.mp3 *.m4a)"));
     if (fileName.isEmpty())
         return;
     QFileInfo fi(fileName);
@@ -207,7 +210,7 @@ void MainWindow::saveVideoAs(void)
     Q_D(MainWindow);
     bool success = d->settingsForm->chooseOutputFile();
     if (success)
-        saveVideo();
+        onSaveCancelClicked();
 }
 
 
@@ -258,10 +261,11 @@ void MainWindow::saveVideo(void)
     QFileInfo fi(d->settingsForm->getOutputFile());
     if (fi.exists()) {
         QMessageBox::StandardButton button;
-        button = QMessageBox::question(this,
-                                       tr("Overwrite file?"),
-                                       tr("The selected output file already exists."
-                                          " Do you want to overwrite the file?"));
+        button = QMessageBox::question(
+                    this,
+                    tr("Overwrite file?"),
+                    tr("The selected output file already exists."
+                       " Do you want to overwrite the file?"));
         if (button != QMessageBox::Yes)
             return;
     }
@@ -304,21 +308,17 @@ void MainWindow::saveVideo(void)
     QString cmdLine =
             QString("\"%1\"")
             .arg(d->settingsForm->getMencoderPath()) +
-            QString(" mf://@%1")
-            .arg(frameFileList.fileName()) +
-            QString(" -mf w=%1:h=%2:fps=%3:type=png")
-            .arg(frame.width())
-            .arg(frame.height())
-            .arg(d->fps) +
-            QString(" -of avi") +
-            QString(" -ovc lavc") +
-            QString(" -lavcopts vcodec=%1:aspect=%2/%3")
-            .arg(d->settingsForm->getLavcOptions())
-            .arg(frame.width() / aspectDiv)
-            .arg(frame.height() / aspectDiv) +
-            QString(" -oac mp3lame") +
-            QString(" -lameopts cbr:br=%2")
-            .arg(d->settingsForm->getAudioBitrate()) +
+            QString(" mf://@%1 ")
+            .arg(frameFileList.fileName());
+    QString mOpts = d->settingsForm->getMEncoderOptions();
+    mOpts.replace("%1", QString::number(frame.width()));
+    mOpts.replace("%2", QString::number(frame.height()));
+    mOpts.replace("%3", QString::number(d->fps));
+    mOpts.replace("%4", QString::number(frame.width() / aspectDiv));
+    mOpts.replace("%5", QString::number(frame.height() / aspectDiv));
+    mOpts.replace("%6", QString::number(d->settingsForm->getAudioBitrate()));
+    mOpts.replace("%7", QString::number(QThread::idealThreadCount()));
+    cmdLine += mOpts +
             QString(" -audiofile \"%1\"")
             .arg(d->audioFilename) +
             QString(" -o \"%1\"")
@@ -357,8 +357,7 @@ void MainWindow::deleteProcess(void)
     d->process->waitForFinished();
     delete d->process;
     d->process = nullptr;
-    d->consoleWidget->clear();
-    d->consoleWidget->hide();
+    // d->consoleWidget->hide();
 }
 
 
@@ -367,11 +366,12 @@ bool MainWindow::processAllowedToBeCanceled(void)
     Q_D(MainWindow);
     if (d->process != nullptr && d->process->state() == QProcess::Running) {
         QMessageBox::StandardButton button;
-        button = QMessageBox::question(this,
-                                     tr("Really exit?"),
-                                     tr("The encoder is running in the background."
-                                        " If you quit, the process will be cancelled and the results be lost."
-                                        " Do you really want to quit?"));
+        button = QMessageBox::question(
+                    this,
+                    tr("Really exit?"),
+                    tr("The encoder is running in the background."
+                       " If you quit, the process will be cancelled and the results be lost."
+                       " Do you really want to quit?"));
         if (button == QMessageBox::Yes) {
             d->process->close();
             return true;
@@ -483,7 +483,7 @@ void MainWindow::calculateFPS(void)
     if (d->movie->frameCount() > 0) {
         qreal bpm = ui->bpmSpinBox->value();
         d->fps = bpm / 60.0 * d->movie->frameCount();
-        ui->fpsLineEdit->setText(QString("%1").arg(d->fps, 0, 'g', 4));
+        ui->fpsDoubleSpinBox->setValue(d->fps);
         d->movie->setSpeed(qRound(100 / d->originalFPS * d->fps));
         qreal duration = d->audio->duration() > 0 ? 1e-3 * d->audio->duration() : 1;
         d->framesNeeded = qRound(d->fps * duration);
@@ -613,17 +613,15 @@ void MainWindow::countBeat(void)
 {
     Q_D(MainWindow);
     if (d->beatInterval.elapsed() > 1 * 1000) {
-        ui->bpmSpinBox->setValue(0);
         d->beatCount = 0;
         d->beatSamplingTime.start();
         d->beatInterval.start();
         ui->bpmSpinBox->setStyleSheet("background-color: transparent");
-        ui->bpmSpinBox->setValue(121.0);
     }
     else {
         ++d->beatCount;
         if (d->beatSamplingTime.elapsed() > 0) {
-            qreal bpm = 1e3 * 60 * d->beatCount / d->beatSamplingTime.elapsed();
+            qreal bpm = 60e3 * d->beatCount / qreal(d->beatSamplingTime.elapsed());
             ui->bpmSpinBox->setValue(bpm);
             ui->bpmSpinBox->setStyleSheet("background-color: #ffcc33");
             d->beatInterval.start();
@@ -650,9 +648,10 @@ void MainWindow::saveAppSettings(void)
     settings.setValue("Settings/tmpDir", d->settingsForm->getTempDirectory());
     settings.setValue("Settings/mencoderPath", d->settingsForm->getMencoderPath());
     settings.setValue("Settings/audioBitrate", d->settingsForm->getAudioBitrate());
-    settings.setValue("Settings/lavcOptions", d->settingsForm->getLavcOptions());
+    settings.setValue("Settings/mencoderOptions", d->settingsForm->getMEncoderOptions());
     settings.setValue("Settings/subtitleFont", d->settingsForm->getSubtitleFont());
     settings.setValue("Settings/volume", d->audio->volume());
+    settings.setValue("Settings/frameOffset", ui->offsetSpinBox->value());
     settings.setValue("Console/geometry", d->consoleWidget->saveGeometry());
 }
 
@@ -668,31 +667,34 @@ void MainWindow::restoreAppSettings(void)
     d->settingsForm->setOpenDirectory(settings.value("Settings/openDir", d->settingsForm->getOpenDirectory()).toString());
     d->settingsForm->setTempDirectory(settings.value("Settings/tmpDir", d->settingsForm->getTempDirectory()).toString());
     d->settingsForm->setMencoderPath(settings.value("Settings/mencoderPath", d->settingsForm->getMencoderPath()).toString());
-    d->settingsForm->setLavcOptions(settings.value("Settings/lavcOptions", d->settingsForm->getLavcOptions()).toString());
+    d->settingsForm->setMEncoderOptions(settings.value("Settings/mencoderOptions", d->settingsForm->getMEncoderOptions()).toString());
     d->settingsForm->setSubtitleFont(settings.value("Settings/subtitleFont", d->settingsForm->getSubtitleFont()).toString());
     d->settingsForm->setAudioBitrate(settings.value("Settings/audioBitrate", d->settingsForm->getAudioBitrate()).toInt());
     d->audio->setVolume(settings.value("Settings/volume", 50).toInt());
+    ui->offsetSpinBox->setValue(settings.value("Settings/frameOffset", 0).toInt());
 }
 
 
 void MainWindow::about(void)
 {
-    QMessageBox::about(this, tr("About %1 %2").arg(AppName).arg(AppVersionNoDebug),
-                       tr("<p><b>%1</b> merges animated GIFs and music into videos. "
-                          "See <a href=\"%2\" title=\"%1 project homepage\">%2</a> for more info.</p>"
-                          "<p>Copyright &copy; 2014 %3 &lt;%4&gt;, Heise Zeitschriften Verlag.</p>"
-                          "<p>This program is free software: you can redistribute it and/or modify "
-                          "it under the terms of the GNU General Public License as published by "
-                          "the Free Software Foundation, either version 3 of the License, or "
-                          "(at your option) any later version.</p>"
-                          "<p>This program is distributed in the hope that it will be useful, "
-                          "but WITHOUT ANY WARRANTY; without even the implied warranty of "
-                          "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the "
-                          "GNU General Public License for more details.</p>"
-                          "You should have received a copy of the GNU General Public License "
-                          "along with this program. "
-                          "If not, see <a href=\"http://www.gnu.org/licenses/gpl-3.0\">http://www.gnu.org/licenses</a>.</p>")
-                       .arg(AppName).arg(AppUrl).arg(AppAuthor).arg(AppAuthorMail));
+    QMessageBox::about(
+                this,
+                tr("About %1 %2").arg(AppName).arg(AppVersionNoDebug),
+                tr("<p><b>%1</b> merges animated GIFs and music into videos. "
+                   "See <a href=\"%2\" title=\"%1 project homepage\">%2</a> for more info.</p>"
+                   "<p>Copyright &copy; 2014 %3 &lt;%4&gt;, Heise Zeitschriften Verlag.</p>"
+                   "<p>This program is free software: you can redistribute it and/or modify "
+                   "it under the terms of the GNU General Public License as published by "
+                   "the Free Software Foundation, either version 3 of the License, or "
+                   "(at your option) any later version.</p>"
+                   "<p>This program is distributed in the hope that it will be useful, "
+                   "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+                   "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the "
+                   "GNU General Public License for more details.</p>"
+                   "You should have received a copy of the GNU General Public License "
+                   "along with this program. "
+                   "If not, see <a href=\"http://www.gnu.org/licenses/gpl-3.0\">http://www.gnu.org/licenses</a>.</p>")
+                .arg(AppName).arg(AppUrl).arg(AppAuthor).arg(AppAuthorMail));
 }
 
 
@@ -708,7 +710,6 @@ void MainWindow::enableSave(void)
 void MainWindow::disableSave(void)
 {
     ui->saveFramesButton->setText(tr("Stop encoding"));
-    // ui->saveFramesButton->setEnabled(false);
     ui->actionSaveFramesAs->setEnabled(false);
     ui->actionSaveFrames->setEnabled(false);
 }
