@@ -277,14 +277,15 @@ void MainWindow::saveVideo(void)
             const QTime &subEndTime = QTime::fromMSecsSinceStartOfDay(d->audio->duration()- 1 * 1000);
             if (subtitleFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
                 subtitleFile.write("1\n");
-                subtitleFile.write(QString("%1:%2:%3,000 --> %4:%5:%6,000\n")
-                                   .arg(subStartTime.hour(), 2, 10, QChar('0'))
-                                   .arg(subStartTime.minute(), 2, 10, QChar('0'))
-                                   .arg(subStartTime.second(), 2, 10, QChar('0'))
-                                   .arg(subEndTime.hour(), 2, 10, QChar('0'))
-                                   .arg(subEndTime.minute(), 2, 10, QChar('0'))
-                                   .arg(subEndTime.second(), 2, 10, QChar('0'))
-                                   .toLocal8Bit());
+                subtitleFile.write(
+                            QString("%1:%2:%3,000 --> %4:%5:%6,000\n")
+                            .arg(subStartTime.hour(), 2, 10, QChar('0'))
+                            .arg(subStartTime.minute(), 2, 10, QChar('0'))
+                            .arg(subStartTime.second(), 2, 10, QChar('0'))
+                            .arg(subEndTime.hour(), 2, 10, QChar('0'))
+                            .arg(subEndTime.minute(), 2, 10, QChar('0'))
+                            .arg(subEndTime.second(), 2, 10, QChar('0'))
+                            .toLocal8Bit());
                 subtitleFile.write(tr("Music: %1 - %2")
                                    .arg(d->artist)
                                    .arg(d->title).toLocal8Bit());
@@ -327,7 +328,8 @@ void MainWindow::saveVideo(void)
         cmdLine +=
                 QString(" -sub \"%1\"")
                 .arg(this->getSubtitleFilename()) +
-                QString(" -font \"%1\"").arg(d->settingsForm->getSubtitleFont()) +
+                QString(" -font \"%1\"")
+                .arg(d->settingsForm->getSubtitleFont()) +
                 QString(" -subfont-text-scale 3");
     disableSave();
     d->consoleWidget->clear();

@@ -171,9 +171,10 @@ void SettingsForm::setSubtitlesEnabled(bool enabled)
 bool SettingsForm::chooseOutputFile(void)
 {
     const QString &outDir =
-            QFileDialog::getSaveFileName(this,
-                                         tr("Select output file"),
-                                         ui->outputFileLineEdit->text());
+            QFileDialog::getSaveFileName(
+                this,
+                tr("Select output file"),
+                ui->outputFileLineEdit->text());
     if (outDir.isEmpty())
         return false;
     ui->outputFileLineEdit->setText(outDir);
@@ -210,7 +211,9 @@ void SettingsForm::chooseTempDirectory(void)
 void SettingsForm::chooseMencoder(void)
 {
     const QString &path =
-            QFileDialog::getOpenFileName(this, tr("Select mencoder binary"));
+            QFileDialog::getOpenFileName(
+                this,
+                tr("Select mencoder binary"));
     if (path.isEmpty())
         return;
     ui->mencoderPathLineEdit->setText(path);
