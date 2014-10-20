@@ -446,9 +446,12 @@ void MainWindow::audioBufferReady(const QAudioBuffer &buf)
 }
 
 
-void MainWindow::metaDataAvailableChanged(bool)
+void MainWindow::metaDataAvailableChanged(bool available)
 {
     Q_D(MainWindow);
+    // don't need to check availability because metaData() will
+    // return an empty string if no metadata is available
+    Q_UNUSED(available);
     d->artist = d->audio->metaData("Author").toString();
     d->title = d->audio->metaData("Title").toString();
 }
